@@ -277,6 +277,8 @@ function updateNav() {
     if (h) h.innerHTML = '<button class="btn-sm btn-accent" onclick="goPage(\'fixtures\')">Result</button>'
       + '<button class="btn-sm btn-outline" onclick="goPage(\'profile\')">Profile</button>';
     var af = $('add-fix-btn');   if (af) af.style.display = isAdmin ? 'inline-flex' : 'none';
+    var cb = $('challenge-btn'); if (cb) cb.style.display = 'inline-flex';
+    var dfb = $('drawer-friendly-btn'); if (dfb) dfb.style.display = 'flex';
     var sp = $('score-panel');   if (sp) sp.classList.remove('hidden');
     var da = $('drawer-admin-btn'); if (da) da.style.display = isAdmin ? 'flex' : 'none';
     var ds = $('drawer-signout-btn'); if (ds) ds.style.display = 'flex';
@@ -287,6 +289,8 @@ function updateNav() {
     var h = $('home-cta');
     if (h) h.innerHTML = '<button class="btn-sm btn-accent" onclick="lTab(\'up\');showLanding()">Join</button>';
     var af = $('add-fix-btn');   if (af) af.style.display = 'none';
+    var cb = $('challenge-btn'); if (cb) cb.style.display = 'none';
+    var dfb = $('drawer-friendly-btn'); if (dfb) dfb.style.display = 'none';
     var sp = $('score-panel');   if (sp) sp.classList.add('hidden');
     var da = $('drawer-admin-btn'); if (da) da.style.display = 'none';
     var ds = $('drawer-signout-btn'); if (ds) ds.style.display = 'none';
@@ -453,6 +457,9 @@ function initRefereeSystem() {
 }
 function listenMatchRooms()      { /* matchroom.js */ }
 function initSwap()              { /* swap.js   */ }
+function initFriendly()          { /* friendly.js */ }
+function openFriendlyModal()     { /* friendly.js */ }
+function renderFriendlySection() { /* friendly.js */ }
 function checkPendingAutoApprovals() { /* matchroom.js */ }
 function listenRefDuties()       { /* referee.js */ }
 function openGoogleSetup(user)   { /* auth.js   */ }
@@ -562,6 +569,7 @@ function startListeners(authTimeout, onResolved) {
         if(typeof listenRedDots==='function') listenRedDots();
         if(typeof listenNotifBadge==='function') listenNotifBadge();
         if(typeof listenBroadcast==='function') listenBroadcast();
+        if(typeof initFriendly==='function') initFriendly();
         checkRefereeDuties();
         return;
       }
@@ -609,6 +617,7 @@ function startListeners(authTimeout, onResolved) {
         if (typeof listenRoomCodes === 'function') listenRoomCodes();
         if (typeof listenNotifBadge === 'function') listenNotifBadge();
         if (typeof listenBroadcast === 'function') listenBroadcast();
+        if (typeof initFriendly === 'function') initFriendly();
         // Show referee drawer btn only when needed
         checkRefereeDuties();
 

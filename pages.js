@@ -357,8 +357,31 @@ function toggleAddFixture() {
 // ── SCHEDULING ────────────────────────────────────────────────
 var SLOT_MS = 15 * 60 * 1000;
 
-function pickRef(lid, excl) {
-  var pool = Object.values(allPlayers).filter(function (p) { return p.league === lid && !excl.includes(p.uid); });
+function pickRef(lid, excl, matchTime) {
+  // Build list of UIDs who are already playing or reffing at the same time
+  var busyUIDs = excl.slice();
+  if (matchTime) {
+    var DAY_START = matchTime - (matchTime % (24*60*60*1000));
+    var DAY_END   = DAY_START + 24*60*60*1000;
+    Object.values(allMatches).forEach(function(m) {
+      if (!m.matchTime) return;
+      if (m.matchTime >= DAY_START && m.matchTime < DAY_END) {
+        if (m.homeId)     busyUIDs.push(m.homeId);
+        if (m.awayId)     busyUIDs.push(m.awayId);
+        if (m.refereeUID) busyUIDs.push(m.refereeUID);
+      }
+    });
+  }
+  // Try same-league first
+  var pool = Object.values(allPlayers).filter(function(p) {
+    return p.league === lid && !busyUIDs.includes(p.uid);
+  });
+  // Fall back to any player if same-league exhausted
+  if (!pool.length) {
+    pool = Object.values(allPlayers).filter(function(p) {
+      return !busyUIDs.includes(p.uid);
+    });
+  }
   if (!pool.length) return { uid:'', name:'TBD' };
   var r = pool[Math.floor(Math.random() * pool.length)];
   return { uid:r.uid, name:r.username };
@@ -384,7 +407,7 @@ function scheduleMatch(mid, lid, hid, aid) {
   if (!db) return;
   var base = Math.ceil((Date.now() + 3600000) / SLOT_MS) * SLOT_MS + Math.floor(Math.random() * 8) * SLOT_MS;
   var slot = findSlot(base, hid, aid, [mid]);
-  var ref  = pickRef(lid, [hid, aid]);
+  var ref  = pickRef(lid, [hid, aid], slot);
   db.ref(DB.matches + '/' + mid).update({ matchTime:slot, scheduledAt:Date.now(), refereeUID:ref.uid, refereeName:ref.name });
 }
 
@@ -397,7 +420,7 @@ function autoScheduleLeague() {
   var updates = {};
   pending.sort(function () { return Math.random() - .5; }).forEach(function (m) {
     var slot = findSlot(base, m.homeId, m.awayId, [m.id]);
-    var ref  = pickRef(lid, [m.homeId, m.awayId]);
+    var ref  = pickRef(lid, [m.homeId, m.awayId], slot);
     updates[DB.matches + '/' + m.id + '/matchTime']    = slot;
     updates[DB.matches + '/' + m.id + '/scheduledAt']  = Date.now();
     updates[DB.matches + '/' + m.id + '/refereeUID']   = ref.uid;
@@ -459,6 +482,7 @@ function renderSchedTimeline() {
 // ── MATCH PREP ────────────────────────────────────────────────
 function renderMatchPrep() {
   renderMySwapSection();
+  if (typeof renderFriendlySection === 'function') renderFriendlySection();
   if (!myProfile) {
     var h = $('prep-home-list'); if (h) h.innerHTML = '<div class="card empty">Login to view your matches.</div>'; return;
   }
@@ -728,11 +752,22 @@ function renderPredictions() {
   var html = '<div class="section-header"><div class="section-title c-gold">🎯 Predictions</div><div class="section-line gold"></div></div>'
     + '<div style="font-size:.72rem;color:var(--dim);margin-bottom:.8rem">Predict scores. Exact = 3pts, correct outcome = 1pt.</div>';
 
-  upcoming.forEach(function(m) {
-    var hp = allPlayers[m.homeId], ap = allPlayers[m.awayId]; if (!hp||!ap) return;
+  // Filter out user's own matches — they can't predict their own
+  var predictable = upcoming.filter(function(m){
+    return !(myProfile && (m.homeId===myProfile.uid||m.awayId===myProfile.uid))
+      && allPlayers[m.homeId] && allPlayers[m.awayId];
+  });
+
+  if (!predictable.length && upcoming.length) {
+    // Matches exist but all are user's own
+    pg.innerHTML = html + '<div class="card empty">All upcoming fixtures are your own matches — nothing to predict right now.</div>';
+    return;
+  }
+
+  predictable.forEach(function(m) {
+    var hp = allPlayers[m.homeId], ap = allPlayers[m.awayId];
     var lg = LGS[m.league]||{};
-    var isMine = myProfile && (m.homeId===myProfile.uid||m.awayId===myProfile.uid);
-    if (isMine) return; // can't predict your own match
+    var isFriendly = !!m.isFriendly;
 
     // Big match detection
     var table = computeStd(m.league);
@@ -766,6 +801,10 @@ function renderPredictions() {
       + '</div>';
   });
 
+  // If html only has the header (no cards added), show empty message
+  if (!predictable.length) {
+    html += '<div class="card empty">No upcoming fixtures to predict.</div>';
+  }
   pg.innerHTML = html;
 }
 

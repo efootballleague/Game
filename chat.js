@@ -274,14 +274,33 @@ function sendLeagueMsg() {
 function renderRoomsList() {
   var el = $('msng-content'); if (!el) return;
   if (!myProfile) { el.innerHTML = '<div class="msng-empty">Login to view match rooms</div>'; return; }
-  var uid   = myProfile.uid;
-  var rooms = Object.values(allMatches).filter(function(m) {
-    return !m.played && (m.homeId===uid || m.awayId===uid || m.refereeUID===uid);
+  var uid = myProfile.uid;
+  var now = Date.now();
+
+  // ── UNSETTLED: played but pending review/dispute ──────────
+  var unsettled = Object.values(allMatches).filter(function(m) {
+    return (m.homeId===uid || m.awayId===uid || m.refereeUID===uid)
+      && m.played && (m.pendingResult || m.awayVerifying || m.awayDispute);
   });
-  if (!rooms.length) {
-    el.innerHTML = '<div class="msng-empty">No active match rooms.<br><span style="font-size:.7rem;color:var(--dim)">Rooms appear when fixtures are scheduled.</span></div>'; return;
+
+  // ── UPCOMING: unplayed, only the NEXT match per pairing ──
+  var upcoming = Object.values(allMatches).filter(function(m) {
+    return (m.homeId===uid || m.awayId===uid || m.refereeUID===uid)
+      && !m.played && !m.pendingResult && !m.awayVerifying;
+  }).sort(function(a,b){ return (a.matchTime||9e12)-(b.matchTime||9e12); });
+
+  // Only show the single next upcoming match
+  var nextMatch = upcoming.length ? [upcoming[0]] : [];
+
+  var all = unsettled.concat(nextMatch);
+
+  if (!all.length) {
+    el.innerHTML = '<div class="msng-empty">No active match rooms.<br>'
+      + '<span style="font-size:.7rem;color:var(--dim)">Your next fixture will appear here once scheduled.</span></div>';
+    return;
   }
-  el.innerHTML = '<div class="msng-list-wrap">' + rooms.map(function(m) {
+
+  function roomRow(m, label, labelColor) {
     var hp = allPlayers[m.homeId], ap = allPlayers[m.awayId]; if (!hp||!ap) return '';
     var lg    = LGS[m.league]||{};
     var isRef = m.refereeUID === uid;
@@ -294,29 +313,84 @@ function renderRoomsList() {
       + '<div class="msng-room-meta">'
       + '<span class="lg-badge" style="background:'+lg.bg+';color:'+lg.c+';border:1px solid '+lg.c+'44">'+esc(lg.short||'')+'</span>'
       + '<span style="font-size:.6rem;color:'+roleC+';font-weight:700">'+role+'</span>'
-      + (m.matchTime ? '<span style="font-size:.6rem;color:var(--dim)">'+fmtFull(m.matchTime)+'</span>' : '')
+      + (label ? '<span style="font-size:.58rem;font-weight:700;color:'+labelColor+';background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:5px">'+label+'</span>' : '')
       + '</div>'
-      + (m.roomCode ? '<div style="font-size:.62rem;color:var(--dim);margin-top:2px">Code: <span style="color:var(--cyan);font-family:Orbitron,sans-serif">'+esc(m.roomCode)+'</span></div>' : '')
+      + (m.matchTime ? '<div style="font-size:.6rem;color:var(--dim);margin-top:2px">'+fmtFull(m.matchTime)+'</div>' : '')
+      + (m.roomCode ? '<div style="font-size:.62rem;margin-top:2px">Code: <span style="color:var(--cyan);font-family:Orbitron,sans-serif">'+esc(m.roomCode)+'</span></div>' : '')
       + '</div>'
       + clubBadge(ap.club, m.league, 22)
       + '</div>';
-  }).join('') + '</div>';
+  }
+
+  var html = '<div class="msng-list-wrap">';
+
+  // Unsettled section
+  if (unsettled.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.56rem;color:var(--gold);letter-spacing:1.5px;padding:.6rem 1rem .3rem">UNSETTLED MATCHES</div>';
+    unsettled.forEach(function(m) {
+      var statusLabel, statusColor;
+      if (m.awayDispute) {
+        statusLabel = 'Ref Approval'; statusColor = 'var(--pink)';
+      } else if (m.awayVerifying) {
+        if (m.awayId === uid) { statusLabel = 'Your Approval'; statusColor = 'var(--gold)'; }
+        else { statusLabel = 'Away Verifying'; statusColor = 'var(--gold)'; }
+      } else if (m.pendingResult) {
+        var isRef = m.refereeUID === uid;
+        var isAdmin = me && me.email === ADMIN_EMAIL;
+        if (isRef || isAdmin) { statusLabel = 'Ref Approval'; statusColor = 'var(--cyan)'; }
+        else { statusLabel = 'Pending Ref'; statusColor = 'var(--dim)'; }
+      } else {
+        statusLabel = 'Unsettled'; statusColor = 'var(--dim)';
+      }
+      html += roomRow(m, statusLabel, statusColor);
+    });
+  }
+
+  // Next upcoming match
+  if (nextMatch.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.56rem;color:var(--cyan);letter-spacing:1.5px;padding:.6rem 1rem .3rem">NEXT MATCH</div>';
+    html += roomRow(nextMatch[0], '', '');
+  }
+
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function openRoomChat(matchId) {
   activeRoomId = matchId;
   var m = allMatches[matchId]; if (!m) return;
-  var hp = allPlayers[m.homeId], ap = allPlayers[m.awayId]; if (!hp||!ap) return;
+  var hp = allPlayers[m.homeId], ap = allPlayers[m.awayId];
+  // Allow opening even if player profiles not loaded yet
+  var homeName = (hp && hp.username) || m.homeName || 'Home';
+  var awayName = (ap && ap.username) || m.awayName || 'Away';
   var el = $('msng-content'); if (!el) return;
+
+  // Status badge
+  var statusBadge = '';
+  if (m.awayDispute) {
+    statusBadge = '<span style="font-size:.56rem;font-weight:700;color:var(--pink);background:rgba(255,40,130,0.12);border:1px solid rgba(255,40,130,0.3);border-radius:5px;padding:1px 6px">DISPUTED — Ref Approval</span>';
+  } else if (m.awayVerifying) {
+    statusBadge = '<span style="font-size:.56rem;font-weight:700;color:var(--gold);background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.25);border-radius:5px;padding:1px 6px">Awaiting Verification</span>';
+  } else if (m.pendingResult) {
+    statusBadge = '<span style="font-size:.56rem;font-weight:700;color:var(--cyan);background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.25);border-radius:5px;padding:1px 6px">Pending Ref</span>';
+  }
+
+  // Referee line
+  var refLine = m.refereeName && m.refereeName !== 'TBD'
+    ? '<div style="font-size:.58rem;color:var(--dim);margin-top:2px">🟢 Ref: <span style="color:var(--green)">'+esc(m.refereeName)+'</span></div>'
+    : '<div style="font-size:.58rem;color:var(--dim);margin-top:2px">🟡 Referee: TBD</div>';
+
   el.innerHTML =
     '<div class="msng-thread-wrap">'
     + '<div class="msng-thread-header">'
     + '<button class="msng-back-sm" onclick="activeRoomId=null;if(roomChatOff){roomChatOff();roomChatOff=null;}renderRoomsList()">&#8592;</button>'
-    + '<div style="flex:1">'
-    + '<div class="msng-thread-name" style="font-size:.78rem">' + esc(hp.username) + ' vs ' + esc(ap.username) + '</div>'
+    + '<div style="flex:1;min-width:0">'
+    + '<div class="msng-thread-name" style="font-size:.78rem">' + esc(homeName) + ' vs ' + esc(awayName) + '</div>'
     + (m.matchTime ? '<div style="font-size:.58rem;color:var(--dim)">' + fmtFull(m.matchTime) + '</div>' : '')
+    + refLine
+    + (statusBadge ? '<div style="margin-top:3px">'+statusBadge+'</div>' : '')
     + '</div>'
-    + (m.roomCode ? '<div class="mcode" style="font-size:.6rem;padding:2px 6px;cursor:pointer" onclick="copyCode(\''+esc(m.roomCode)+'\')">'+esc(m.roomCode)+'</div>' : '')
+    + (m.roomCode ? '<div class="mcode" style="font-size:.6rem;padding:2px 6px;cursor:pointer;flex-shrink:0" onclick="copyCode(\''+esc(m.roomCode)+'\')">'+esc(m.roomCode)+'</div>' : '')
     + '</div>'
     + '<div id="msng-msgs" class="msng-msgs"></div>'
     + '<div class="msng-inp-row">'

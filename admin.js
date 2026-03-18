@@ -584,12 +584,32 @@ function autoScheduleForLeague(lid) {
   allRounds.forEach(function(round,ri) {
     var matchDay=ri+1, dayMs=startMs+ri*DAY_MS;
     if(!refByDay[ri]) refByDay[ri]=[];
+
+    // Pre-collect all UIDs playing on this match day
+    var playingToday = round.reduce(function(acc,f){
+      if(f&&f.home) acc.push(f.home.uid);
+      if(f&&f.away) acc.push(f.away.uid);
+      return acc;
+    },[]);
+
     round.forEach(function(fx,si) {
       if(!fx.home||!fx.away) return;
       if(existingKeys[fx.home.uid+'_'+fx.away.uid]) return;
       var matchTime=dayMs+(si%2)*SLOT;
-      var busyToday=round.reduce(function(acc,f){ if(f&&f.home)acc.push(f.home.uid); if(f&&f.away)acc.push(f.away.uid); return acc; },[]);
-      var refPool=players.filter(function(p){ return !busyToday.includes(p.uid)&&!refByDay[ri].includes(p.uid); });
+
+      // Referee must NOT be playing on this day AND not already reffing another game today
+      var refPool=players.filter(function(p){
+        return !playingToday.includes(p.uid) && !refByDay[ri].includes(p.uid);
+      });
+
+      // If no eligible ref in same league, try cross-league (all players)
+      if(!refPool.length){
+        var allP=Object.values(allPlayers).filter(function(p){
+          return !playingToday.includes(p.uid)&&!refByDay[ri].includes(p.uid);
+        });
+        refPool=allP;
+      }
+
       var ref=refPool.length?refPool[Math.floor(Math.random()*refPool.length)]:null;
       if(ref) refByDay[ri].push(ref.uid);
       var key=db.ref(DB.matches).push().key;

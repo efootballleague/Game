@@ -295,13 +295,7 @@ function refreshNews(){
 }
 
 function generateAllNews(){
-  if(!allPlayers||!Object.keys(allPlayers).length){
-    // No players yet — clear cache and show placeholder
-    _newsCache=[];
-    if(typeof renderNewsFeatured==='function') renderNewsFeatured();
-    if(activePage()==='news') renderNewsAnchor();
-    return;
-  }
+  if(!allPlayers||!Object.keys(allPlayers).length)return;
   var items=[];
   ['epl','laliga','seriea','ligue1'].forEach(function(lid){items=items.concat(genLeague(lid));});
   items=items.concat(genCross());
@@ -410,6 +404,193 @@ function genCross(){
   [5,10,25,50,100].forEach(function(n){if(allPlayed.length===n){var v=V.milestone(n,'ms'+n);items.push(makeStory('all','milestone',80,v[0],v[1][0],v[1].slice(1)));}}); // fix: milestone returns [subline,body[]]
   if(tp>=8)items.push(makeStory('all','community',65,'👥 '+tp+' managers registered across all leagues','eFootball Universe keeps growing — community now at '+tp+' players.',[tp+' managers competing across EPL, La Liga, Serie A and Ligue 1.',
     'The competition gets stronger every week. Tell your friends — this is where it happens. Here we go!']));
+
+  // ── FRIENDLY MATCH NEWS ──────────────────────────────────────
+  items = items.concat(genFriendlyNews());
+
+  return items;
+}
+
+// ── FRIENDLY MATCH NEWS GENERATOR ────────────────────────────
+var V_FRIENDLY_UPCOMING = [
+  function(h,a,seed){ return [
+    h.username+' vs '+a.username+' — a friendly arranged outside the league.',
+    [h.username+' ('+h.club+') and '+a.username+' ('+a.club+') have arranged a cross-league friendly. No points on the line — just pride.',
+     'Both players are using this as preparation and a chance to settle some personal bragging rights.',
+     'The match is confirmed. Let the trash talk begin. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    h.username+' challenges '+a.username+' to a friendly — they want answers.',
+    [h.username+' has extended a direct challenge to '+a.username+'. A friendly match — no league implications, pure competition.',
+     'This kind of cross-league battle always produces something special. Styles clash, egos get tested.',
+     'The challenge has been accepted. We are here for it. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'Friendly confirmed: '+h.username+' vs '+a.username+' in a cross-league showdown.',
+    ['eFootball Universe loves a friendly and this one has all the ingredients.',h.username+' ('+h.club+') against '+a.username+' ('+a.club+') — different leagues, same hunger to win.',
+     'No referee drama, no point deductions — just football. We love to see it. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    h.username+' and '+a.username+' set for a friendly clash — who wants it more?',
+    ['When two players from different leagues agree to a friendly, it says something about their mentality.',
+     h.username+' and '+a.username+' clearly want to prove a point beyond their own league tables.',
+     'This is exactly the kind of match that builds rivalries. Watch this space. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'Friendly alert: '+h.username+' ('+h.club+') vs '+a.username+' ('+a.club+'). Big one.',
+    ['Not everything is about league points. '+h.username+' and '+a.username+' have set up a friendly that has got everyone talking.',
+     'Pride, bragging rights, and a chance to test yourself against someone from a different league.',
+     'The fixture is confirmed and the build-up has already started. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    h.username+' and '+a.username+' to face off in a friendly — personal rivalry developing.',
+    ['There is something brewing between '+h.username+' and '+a.username+'. A friendly has been arranged — their first meeting.',
+     'First meetings in football are always fascinating. Who has done their homework? Who is more prepared?',
+     'We will get our answers on the pitch. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'Friendly match booked: '+h.username+' vs '+a.username+'. Cross-league fire.',
+    ['Outside the league structure, anything can happen. '+h.username+' and '+a.username+' have proved that by booking a friendly.',
+     h.club+' vs '+a.club+' — a matchup that the regular season would never produce.',
+     'These are the matches that make eFootball Universe special. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    h.username+' accepts challenge from '+a.username+'. Friendly on. Respect.',
+    ['When '+a.username+' sent the challenge, not everyone expected '+h.username+' to accept. They did — immediately.',
+     'That shows confidence. That shows character. A friendly has been locked in.',
+     'This is what the game is about. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'Friendly showdown: '+h.username+' vs '+a.username+'. Two leagues, one match.',
+    ['eFootball Universe brings players from four leagues together — and sometimes they face each other directly.',
+     h.username+' and '+a.username+' are the latest to set up a friendly encounter that league fixtures would never allow.',
+     'Two different styles. One winner. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    h.username+' and '+a.username+' go head to head in a friendly. No league points — all pride.',
+    ['Strip away the table implications and what do you have? Pure football. '+h.username+' and '+a.username+' have chosen that.',
+     'A friendly match — agreed, confirmed, and both sides ready to compete.',
+     'The best games are sometimes the ones that don\'t count on paper. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'Cross-league friendly booked: '+h.username+' ('+h.club+') vs '+a.username+' ('+a.club+').',
+    ['Different leagues, different styles, same ambition. '+h.username+' and '+a.username+' wanted to find out who is better — so they arranged it themselves.',
+     'A cross-league friendly of this kind is always a special occasion in eFootball Universe.',
+     'Mark it in your calendar. Here we go!']
+  ]; },
+  function(h,a,seed){ return [
+    'It\'s on: '+h.username+' vs '+a.username+' in a friendly. Bragging rights on the line.',
+    ['No league implications. No referee-assigned result pressure. Just '+h.username+' and '+a.username+' settling it on the pitch.',
+     'Friendly matches reveal character. You find out who really has it when nothing official is at stake.',
+     'All the bragging rights in the world though. Here we go!']
+  ]; }
+];
+
+var V_FRIENDLY_RESULT = [
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' beats '+l.username+' '+hg+'-'+ag+' in a friendly. Bragging rights secured.':'Friendly ends level — '+hg+'-'+ag+'. Honours even between '+h.username+' and '+a.username+'.'),
+    [(w?w.username+' ('+w.club+') takes the friendly win over '+l.username+' ('+l.club+') with a '+hg+'-'+ag+' scoreline.':'A draw. '+h.username+' and '+a.username+' could not be separated — '+hg+'-'+ag+' the final score.'),
+     (w?'No league points change hands but the bragging rights are firmly with '+w.username+' tonight.':'When the final whistle goes and neither side has won, both managers walk away with questions. The friendly produced no winner — and that will stay on both their minds.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' wins the friendly — '+l.username+' left with plenty to think about.':h.username+' and '+a.username+' share the spoils in '+hg+'-'+ag+' friendly draw.'),
+    [(w?'Final score: '+hg+'-'+ag+'. '+w.username+' edges a competitive friendly against '+l.username+'. No points, but plenty of satisfaction.':'Final score: '+hg+'-'+ag+'. Neither '+h.username+' nor '+a.username+' could find a winning goal. A stalemate that both will analyse.'),
+     (w?l.username+' will be stewing on this one. Friendly or not, losing always stings.':'The draw means both walk away with their records intact — but the debate about who was better will continue.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?'Friendly result: '+h.username+' '+hg+'-'+ag+' '+a.username+'. '+w.username+' wins convincingly.':h.username+' '+hg+'-'+ag+' '+a.username+' in a friendly. Neither side could separate themselves.'),
+    [(w?'A statement performance from '+w.username+' ('+w.club+') who beats '+l.username+' '+hg+'-'+ag+' in their cross-league friendly.':''+hg+'-'+ag+'. '+h.username+' and '+a.username+' fought hard in their friendly but the scoreline tells the story — no winner.'),
+     (w?'The margin of victory is not huge but the message is clear — '+w.username+' wanted it more today.':'In friendly football, a draw is often a fair reflection. Both had moments. Neither took them when it mattered most.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' ('+hg+'-'+ag+') gets the better of '+a.username+' in a hard-fought friendly.':'Honours even: '+h.username+' and '+a.username+' draw '+hg+'-'+ag+' in their friendly encounter.'),
+    [(w?'A quality friendly that '+w.username+' edges '+hg+'-'+ag+'. '+l.username+' competed but was ultimately second best today.':'The friendly between '+h.username+' and '+a.username+' ends without a winner — '+hg+'-'+ag+' after a competitive game.'),
+     (w?'Friendly or not, winning is a habit. '+w.username+' has it.':'Both players will take different lessons from this draw. Some will use it as motivation. Watch both of them closely in league play this week.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?'Friendly finished: '+w.username+' wins '+hg+'-'+ag+'. '+l.username+' silenced.':h.username+' vs '+a.username+' friendly ends '+hg+'-'+ag+' — all square.'),
+    [(w?w.username+' ('+w.club+') delivers a composed performance in the cross-league friendly, coming away with a '+hg+'-'+ag+' win over '+l.username+'.':'A '+hg+'-'+ag+' draw in the friendly between '+h.username+' ('+h.club+') and '+a.username+' ('+a.club+'). Competitive from start to finish.'),
+     (w?'No official points — but this kind of win builds belief heading into league action.':'A draw that both will see differently. '+h.username+' will feel they deserved more. '+a.username+' will be satisfied with the point.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' takes the win — '+l.username+' beaten '+hg+'-'+ag+' in cross-league friendly.':h.username+' and '+a.username+' play out a '+hg+'-'+ag+' draw. Both leave with questions.'),
+    [(w?'Cross-league bragging rights go to '+w.username+' after a '+hg+'-'+ag+' victory in the friendly versus '+l.username+'.':'Neither '+h.username+' nor '+a.username+' could break the deadlock beyond '+hg+'-'+ag+' in their friendly. A competitive draw.'),
+     (w?l.username+' competed hard but '+w.username+' was simply sharper when the chances came.':'The friendly produced a draw that may not satisfy either player. Competition at this level demands a winner — they will both want another shot.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?'Friendly result in — '+w.username+' beats '+l.username+' '+hg+'-'+ag+'. Comfortable.':h.username+' '+hg+'-'+ag+' '+a.username+'. Friendly ends without a winner.'),
+    [(w?'No doubting it — '+w.username+' was the better player in this friendly. '+hg+'-'+ag+' is a fair reflection of how the game went.':'When friendlies end in draws, it usually means both players performed to a similar level. That is the case here — '+hg+'-'+ag+'.'),
+     (w?l.username+' will want revenge. These things have a way of carrying over into future encounters.':'Expect both to bring this up next time they face each other — friendly or competitive. Here we go!'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' wins it — '+hg+'-'+ag+'. '+l.username+' left to reflect on a friendly defeat.':h.username+' and '+a.username+' cannot find a winner — friendly ends '+hg+'-'+ag+'.'),
+    [(w?'The cross-league friendly between '+h.username+' and '+a.username+' has its verdict: '+hg+'-'+ag+' to '+w.username+'.':'The friendly between '+h.username+' ('+h.club+') and '+a.username+' ('+a.club+') ends '+hg+'-'+ag+'. A game of moments where neither side took theirs.'),
+     (w?'Winning a friendly is not the same as winning a title — but it feels good. '+w.username+' knows that tonight.':'In a competitive community like eFootball Universe, even friendly results get talked about. This draw will be discussed.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' dominates the friendly — '+l.username+' beaten '+hg+'-'+ag+'. Statement made.':h.username+' and '+a.username+' share the spoils. Friendly finishes '+hg+'-'+ag+'.'),
+    [(w?'A dominant display from '+w.username+' who runs out '+hg+'-'+ag+' winners in the cross-league friendly against '+l.username+'. The message is clear.':''+h.username+' and '+a.username+' go at each other in the friendly and end up sharing everything — the game, the points, the frustration.'),
+     (w?l.username+' was overwhelmed at times. '+w.username+' played with the intensity of a league match. That is what separates the very best.':'A draw that perhaps flattered one side more than the other. Both will claim they deserved more. That debate continues. Here we go!'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' wins the cross-league friendly '+hg+'-'+ag+'. Form is form — wherever you play.':h.username+' vs '+a.username+' friendly: '+hg+'-'+ag+'. The players settle for a draw.'),
+    [(w?'Form follows players across competitions. '+w.username+' showed that today — a '+hg+'-'+ag+' victory in the friendly over '+l.username+'.':'A '+hg+'-'+ag+' draw in a well-contested friendly between '+h.username+' and '+a.username+'. The result leaves both thinking.'),
+     (w?'Whether it is a friendly or a title decider, '+w.username+' delivers. That is the mark of consistency.':'Both will walk away feeling the draw was fair — and both will immediately be thinking about how to get one over the other next time.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?'Cross-league verdict: '+w.username+' beats '+l.username+' '+hg+'-'+ag+'. Impressive.':h.username+' and '+a.username+' play out an entertaining '+hg+'-'+ag+' friendly draw.'),
+    [(w?''+w.username+' ('+w.club+') picks up the bragging rights in this cross-league friendly, beating '+l.username+' ('+l.club+') '+hg+'-'+ag+'.':'Goals on both sides, chances missed by both, and a final score of '+hg+'-'+ag+' in a friendly that entertained from start to finish.'),
+     (w?'Not all wins are created equal but this one will stick. '+l.username+' has a loss to respond to.':'No winner officially, but the entertainment value was high. '+h.username+' and '+a.username+' gave the watching community exactly what they wanted.'),
+     'Here we go!']
+  ]; },
+  function(h,a,hg,ag,seed){ var w=hg>ag?h:ag>hg?a:null,l=hg>ag?a:ag>hg?h:null; return [
+    (w?w.username+' wins it late? '+hg+'-'+ag+'. The friendly ends with '+l.username+' beaten.':h.username+' and '+a.username+' play out an entertaining '+hg+'-'+ag+' friendly stalemate.'),
+    [(w?'Friendly football is supposed to be low stakes. Nobody told '+w.username+' that — a fully committed performance earns a '+hg+'-'+ag+' win over '+l.username+'.':'The '+hg+'-'+ag+' friendly draw between '+h.username+' and '+a.username+' is one that will be remembered — both played with intensity and neither gave an inch.'),
+     (w?l.username+' was competitive throughout but '+w.username+' had the quality to find the decisive moment. That is the difference.':'A draw that means more than the result. The respect between '+h.username+' and '+a.username+' grew today. Look for a rematch soon.'),
+     'Here we go!']
+  ]; }
+];
+
+function genFriendlyNews() {
+  var items = [];
+  var friendlyMatches = Object.values(allMatches).filter(function(m){ return m.isFriendly; });
+  if (!friendlyMatches.length) return items;
+
+  var played   = friendlyMatches.filter(function(m){ return m.played; });
+  var upcoming = friendlyMatches.filter(function(m){ return !m.played && m.homeId && m.awayId; });
+
+  // Upcoming friendly fixtures
+  upcoming.slice(0,3).forEach(function(m){
+    var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return;
+    var seed = m.id||m.homeId+m.awayId;
+    var idx  = Math.abs(seed.split('').reduce(function(h,c){return(h*31+c.charCodeAt(0))&0x7FFFFFFF;},0)) % V_FRIENDLY_UPCOMING.length;
+    var v    = V_FRIENDLY_UPCOMING[idx](hp,ap,seed);
+    items.push(makeStory('all','friendly',78,'⚔️ Friendly: '+hp.username+' vs '+ap.username,v[0],v[1],
+      {homeId:m.homeId,awayId:m.awayId,homeName:hp.username,awayName:ap.username}));
+  });
+
+  // Played friendly results
+  played.slice(-4).reverse().forEach(function(m){
+    var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return;
+    var seed = (m.id||m.homeId+m.awayId)+m.hg+'-'+m.ag;
+    var idx  = Math.abs(seed.split('').reduce(function(h,c){return(h*31+c.charCodeAt(0))&0x7FFFFFFF;},0)) % V_FRIENDLY_RESULT.length;
+    var v    = V_FRIENDLY_RESULT[idx](hp,ap,m.hg,m.ag,seed);
+    var winner = m.hg>m.ag?hp:m.ag>m.hg?ap:null;
+    items.push(makeStory('all','friendlyResult',76,
+      '⚔️ Friendly result: '+hp.username+' '+m.hg+'-'+m.ag+' '+ap.username,v[0],v[1],
+      {homeId:m.homeId,awayId:m.awayId,homeName:hp.username,awayName:ap.username}));
+  });
+
   return items;
 }
 
@@ -419,15 +600,7 @@ var TYPE_COLOR={title:'#FFE600',form:'#00FF85',crisis:'#FF2882',podium:'#00D4FF'
 
 function renderNewsAnchor(){
   var el=$('news-anchor-section');if(!el)return;
-  if(!_newsCache.length){
-    // Check if we actually have data — if not, explain why
-    var hasPlayers = allPlayers && Object.keys(allPlayers).length > 0;
-    var msg = hasPlayers
-      ? '<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div>Generating latest news...</div></div>'
-      : '<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div style="font-size:.82rem">News stories will appear once players and matches are registered.</div></div>';
-    el.innerHTML=msg;
-    return;
-  }
+  if(!_newsCache.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div>Generating latest news...</div></div>';return;}
   var a=NEWS_ANCHOR;
 
   // Anchor header
@@ -571,14 +744,7 @@ function updateNewsTicker(){
 // ── HOME FEATURED NEWS — last 2 stories shown on home screen ──
 function renderNewsFeatured(){
   var el=document.getElementById('news-featured');if(!el)return;
-  if(!_newsCache.length){
-    el.innerHTML='<div onclick="goPage(\'news\')" style="display:flex;align-items:center;gap:.6rem;padding:.65rem .85rem;background:var(--card);border:1px solid rgba(0,212,255,0.12);border-radius:12px;cursor:pointer;margin-bottom:.4rem">'
-      +'<div style="font-size:1.1rem">📰</div>'
-      +'<div style="flex:1"><div style="font-size:.76rem;font-weight:700">News</div>'
-      +'<div style="font-size:.64rem;color:var(--dim)">Stories appear as matches are played</div></div>'
-      +'</div>';
-    return;
-  }
+  if(!_newsCache.length){el.innerHTML='';return;}
   var a=NEWS_ANCHOR;
   var top=_newsCache.slice(0,2);
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem">'

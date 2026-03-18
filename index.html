@@ -478,6 +478,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <button class="drawer-btn" id="drawer-notif-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="notif-badge" class="drawer-badge hidden"><span id="drawer-notif-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" id="drawer-ref-btn" style="display:none" onclick="closeDrawer();goPage('referee')"><span class="drawer-icon">🟢</span> Referee Panel<span id="ref-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('ucl')"><span class="drawer-icon">🏆</span> UCL</button>
+  <button class="drawer-btn" onclick="closeDrawer();openFriendlyModal()" id="drawer-friendly-btn" style="display:none"><span class="drawer-icon">⚔️</span> Friendly Match<span id="friendly-badge" class="drawer-badge hidden"></span></button>
   <div class="drawer-divider"></div>
   <button class="drawer-btn danger" id="drawer-admin-btn" onclick="closeDrawer();goPage('admin')" style="display:none"><span class="drawer-icon">🛡</span> Admin Panel</button>
   <button class="drawer-btn danger" id="drawer-signout-btn" onclick="closeDrawer();doLogout()" style="display:none"><span class="drawer-icon">🚪</span> Sign Out</button>
@@ -517,7 +518,7 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div class="grid2" id="top-players"><div class="card empty">No players yet.</div></div>
   </div>
   <!-- NEWS -->
-  <div class="page" id="page-news"><div id="news-anchor-section"><div class="card empty" style="margin-top:1rem">Loading news...</div></div></div>
+  <div class="page" id="page-news"><div id="news-anchor-section"></div></div>
   <!-- LEAGUES -->
   <div class="page" id="page-leagues">
     <div class="section-header"><div class="section-title c-cyan">Standings</div><div class="section-line"></div></div>
@@ -556,9 +557,10 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
   <!-- MATCH PREP -->
   <div class="page" id="page-matchprep">
+    <div id="friendly-section"></div>
     <div id="my-swap-section"></div>
     <div id="prep-15min-notice"></div>
-    <div class="page-header"><div class="section-title c-gold">Match Prep</div><button class="btn-sm btn-outline" onclick="autoScheduleLeague()">Auto-Schedule</button></div>
+    <div class="page-header"><div class="section-title c-gold">Match Prep</div><div style="display:flex;gap:.4rem"><button class="btn-sm btn-outline" onclick="openFriendlyModal()" id="challenge-btn" style="display:none">⚔️ Challenge</button><button class="btn-sm btn-outline" onclick="autoScheduleLeague()">Auto-Schedule</button></div></div>
     <div class="section-header"><div class="section-title c-cyan" style="font-size:.68rem">MATCH ROOMS</div><div class="section-line"></div></div>
     <div id="match-rooms-wrap"><div id="match-rooms-list"><div class="card empty">Loading...</div></div><div id="match-room-panel" class="hidden"></div></div>
     <div class="section-header"><div class="section-title c-green" style="font-size:.65rem">UPCOMING SCHEDULED</div></div>
@@ -569,7 +571,7 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div id="prep-away-list"></div>
   </div>
   <!-- PREDICTIONS -->
-  <div class="page" id="page-predict"><div class="card empty" style="margin-top:1rem">Loading predictions...</div></div>
+  <div class="page" id="page-predict"></div>
   <!-- UCL -->
   <div class="page" id="page-ucl"><div class="card empty" style="margin-top:1rem">UCL coming in Batch 3</div></div>
   <!-- REFEREE -->
@@ -715,8 +717,6 @@ select.inp option{background:#0e0018;color:var(--text)}
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="config.js"></script>
-<script src="state.js"></script>
-<script src="utils.js"></script>
 <script src="core.js"></script>
 <script src="auth.js"></script>
 <script src="pages.js"></script>
@@ -728,16 +728,52 @@ select.inp option{background:#0e0018;color:var(--text)}
 <script src="ucl.js"></script>
 <script src="admin.js"></script>
 <script src="odds.js"></script>
+<script src="friendly.js"></script>
 <script src="news.js"></script>
 <script>
-  // All routing and nav handled by core.js — no overrides needed here
-  try {
-    initApp();
+  // Extend goPage to handle pages not in core.js routing
+  var _coreGoPage = goPage;
+  goPage = function(name) {
+    _coreGoPage(name);
+    // These pages are NOT handled in core.js goPage so add them here
+    if (name === 'chat')          renderMessenger();
+    if (name === 'predict')       renderPredictions();
+    if (name === 'notifications') renderNotifications();
+    // referee and profile ARE already handled in core.js — don't call again
+    // Show/hide chat FAB
+    var fab = document.getElementById('chat-fab');
+    if (fab) fab.style.display = (name === 'chat') ? 'none' : (myProfile ? 'flex' : 'none');
+  };
+
+  // Update topbar when logged in — show club badge instead of Login/Join
+  var _coreUpdateNav = updateNav;
+  updateNav = function() {
+    _coreUpdateNav();
+    var e = document.getElementById('nav-right');
+    if (!e) return;
+    if (myProfile && myProfile.username) {
+      var club = getClub(myProfile.league, myProfile.club);
+      var init = myProfile.username.charAt(0).toUpperCase();
+      e.innerHTML = '<button class="topbar-club-btn" onclick="goPage(\'profile\')" title="' + esc(myProfile.username) + '">'
+        + (club && club.logo ? '<img src="' + club.logo + '" onerror="this.outerHTML=\'' + init + '\'">' : init)
+        + '</button>';
+      // Show FAB when logged in
+      var fab = document.getElementById('chat-fab');
+      if (fab && activePage() !== 'chat') fab.style.display = 'flex';
+    }
+  };
+
+  // renderHomeStats is defined in pages.js — no stub needed here
+
+  try { 
+    initApp(); 
+    // Hook into auth to start extra listeners
+    var _origStartListeners = startListeners;
   } catch(e) {
-    console.error('Init error:', e);
+    console.error('Init error:',e);
     hideLoader();
-    var h = document.getElementById('page-home');
-    if (h) h.classList.add('active');
+    var h=document.getElementById('page-home');
+    if(h)h.classList.add('active');
   }
 </script>
 
@@ -925,6 +961,24 @@ select.inp option{background:#0e0018;color:var(--text)}
       <button class="btn-secondary" onclick="closeMo('user-postpone-mo')">Cancel</button>
       <button class="btn-primary" onclick="submitUserPostpone()">Confirm Reschedule</button>
     </div>
+  </div>
+</div>
+
+
+<!-- FRIENDLY MATCH CHALLENGE -->
+<div class="modal" id="friendly-mo" onclick="if(event.target===this)closeMo('friendly-mo')">
+  <div class="modal-box"><button class="modal-close" onclick="closeMo('friendly-mo')">✕</button>
+    <h3 class="modal-title">⚔️ Challenge a Player</h3>
+    <p style="font-size:.74rem;color:var(--dim);margin-bottom:.7rem">Challenge any player to a friendly match. No league points — just bragging rights.</p>
+    <div id="friendly-player-list" style="max-height:220px;overflow-y:auto;margin-bottom:.6rem"></div>
+    <div id="friendly-target-info" class="hidden" style="margin-bottom:.6rem"></div>
+    <div id="friendly-send-wrap" class="hidden">
+      <div class="form-group"><label class="lbl">Message (optional)</label><input class="inp" id="friendly-msg-inp" placeholder="e.g. Let's settle this!" maxlength="80"></div>
+      <div class="form-group"><label class="lbl">Proposed Date & Time (optional)</label><input class="inp" id="friendly-date-inp" type="datetime-local"></div>
+      <div class="errmsg" id="friendly-err"></div>
+      <button class="btn-primary full-width" id="friendly-send-btn" onclick="sendFriendlyRequest()">Send Challenge ⚔️</button>
+    </div>
+    <div id="friendly-msg" class="hidden" style="font-size:.78rem;color:var(--green);text-align:center;padding:.6rem;font-weight:700"></div>
   </div>
 </div>
 
