@@ -490,6 +490,34 @@ function startListeners(authTimeout, onResolved) {
       App.db.ref(DB.players+'/'+user.uid).once('value', function(s){
         var data = s.val();
 
+        // Admin account has no player profile — enter app directly
+        if (user.email === ADMIN_EMAIL) {
+          App.state.profile = {
+            uid:      user.uid,
+            username: 'Admin',
+            email:    user.email,
+            league:   'epl',
+            club:     '',
+            avatar:   '',
+            banned:   false,
+            isAdmin:  true
+          };
+          enterApp();
+          setOnline();
+          listenUnread();
+          listenGlobalDMs();
+          initRefereeSystem();
+          listenMatchRooms();
+          initSwap();
+          listenNotifs();
+          if(typeof listenRedDots==='function')    listenRedDots();
+          if(typeof listenRoomCodes==='function')  listenRoomCodes();
+          if(typeof listenNotifBadge==='function') listenNotifBadge();
+          if(typeof listenBroadcast==='function')  listenBroadcast();
+          checkRefereeDuties();
+          return;
+        }
+
         if (!data||!data.username) {
           // New Google user needs setup
           if (user.providerData&&user.providerData[0]&&user.providerData[0].providerId==='google.com') {
