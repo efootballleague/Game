@@ -295,7 +295,13 @@ function refreshNews(){
 }
 
 function generateAllNews(){
-  if(!allPlayers||!Object.keys(allPlayers).length)return;
+  if(!allPlayers||!Object.keys(allPlayers).length){
+    // No players yet — clear cache and show placeholder
+    _newsCache=[];
+    if(typeof renderNewsFeatured==='function') renderNewsFeatured();
+    if(activePage()==='news') renderNewsAnchor();
+    return;
+  }
   var items=[];
   ['epl','laliga','seriea','ligue1'].forEach(function(lid){items=items.concat(genLeague(lid));});
   items=items.concat(genCross());
@@ -413,7 +419,15 @@ var TYPE_COLOR={title:'#FFE600',form:'#00FF85',crisis:'#FF2882',podium:'#00D4FF'
 
 function renderNewsAnchor(){
   var el=$('news-anchor-section');if(!el)return;
-  if(!_newsCache.length){el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div>Generating latest news...</div></div>';return;}
+  if(!_newsCache.length){
+    // Check if we actually have data — if not, explain why
+    var hasPlayers = allPlayers && Object.keys(allPlayers).length > 0;
+    var msg = hasPlayers
+      ? '<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div>Generating latest news...</div></div>'
+      : '<div style="text-align:center;padding:2rem;color:var(--dim)"><div style="font-size:1.5rem;margin-bottom:.5rem">📰</div><div style="font-size:.82rem">News stories will appear once players and matches are registered.</div></div>';
+    el.innerHTML=msg;
+    return;
+  }
   var a=NEWS_ANCHOR;
 
   // Anchor header
@@ -557,7 +571,14 @@ function updateNewsTicker(){
 // ── HOME FEATURED NEWS — last 2 stories shown on home screen ──
 function renderNewsFeatured(){
   var el=document.getElementById('news-featured');if(!el)return;
-  if(!_newsCache.length){el.innerHTML='';return;}
+  if(!_newsCache.length){
+    el.innerHTML='<div onclick="goPage(\'news\')" style="display:flex;align-items:center;gap:.6rem;padding:.65rem .85rem;background:var(--card);border:1px solid rgba(0,212,255,0.12);border-radius:12px;cursor:pointer;margin-bottom:.4rem">'
+      +'<div style="font-size:1.1rem">📰</div>'
+      +'<div style="flex:1"><div style="font-size:.76rem;font-weight:700">News</div>'
+      +'<div style="font-size:.64rem;color:var(--dim)">Stories appear as matches are played</div></div>'
+      +'</div>';
+    return;
+  }
   var a=NEWS_ANCHOR;
   var top=_newsCache.slice(0,2);
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem">'
