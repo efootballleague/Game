@@ -858,12 +858,7 @@ function autoQualifyUCL(lid) {
   });
 }
 
-function adminEndSeason(lid) {
-  if (!me || me.email !== ADMIN_EMAIL) return;
-  if (!confirm('End the ' + (LGS[lid]||{n:lid}).n + ' season? Top 4 will qualify for UCL.')) return;
-  db.ref('ef_season_status/' + lid).set({ ended: true, endedAt: Date.now(), endedBy: 'admin' });
-  autoQualifyUCL(lid);
-}
+// adminEndSeason is defined in admin.js (loads after this file)
 
 // ============================================================
 // ROOM CODE BANNER — instant notification when home drops code

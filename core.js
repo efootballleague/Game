@@ -340,7 +340,7 @@ function updateDrawer() {
 // ── ACTIVE PAGE ───────────────────────────────────────────────
 function activePage() {
   var pages = ['home','leagues','fixtures','matchprep','ucl','polls','leaderboard',
-               'referee','chat','pm','profile','admin','news','predict','notifications'];
+               'referee','chat','pm','profile','admin','news','predict','notifications','friendly'];
   for (var i = 0; i < pages.length; i++) {
     var p = $('page-' + pages[i]);
     if (p && p.classList.contains('active')) return pages[i];

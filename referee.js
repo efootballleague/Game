@@ -364,34 +364,7 @@ function _isSettled(m) {
 }
 
 // ── ADMIN FORCE RESULT ───────────────────────────────────────
-function adminForceResult(mid) {
-  if (!me || me.email !== ADMIN_EMAIL) return;
-  var m = allMatches[mid]; if (!m) return;
-  var hgStr = prompt('Home goals:', m.hg || m.pendingHg || 0);
-  if (hgStr === null) return;
-  var agStr = prompt('Away goals:', m.ag || m.pendingAg || 0);
-  if (agStr === null) return;
-  var hg = parseInt(hgStr), ag = parseInt(agStr);
-  if (isNaN(hg) || isNaN(ag)) { toast('Invalid scores.', 'error'); return; }
-  db.ref(DB.matches + '/' + mid).update({
-    played:        true,
-    hg:            hg,
-    ag:            ag,
-    playedAt:      Date.now(),
-    pendingResult: false,
-    awayVerifying: false,
-    awayDispute:   false,
-    refStatus:     'admin_forced',
-    forcedBy:      me.uid,
-    forcedAt:      Date.now()
-  }).then(function() {
-    toast('Result forced: ' + hg + '-' + ag);
-    renderRefPanel();
-    renderMatchRooms();
-    notifyBothPlayers(mid, 'Admin set result: ' + hg + '-' + ag + '.');
-    if (typeof checkSeasonEnd === 'function') checkSeasonEnd();
-  }).catch(function() { toast('Failed. Try again.', 'error'); });
-}
+// adminForceResult is defined in admin.js
 
 
 if (typeof scheduleAutoClose === 'undefined') {

@@ -301,7 +301,8 @@ function generateAllNews(){
   items=items.concat(genCross());
   items.sort(function(a,b){var d=(b.importance||0)-(a.importance||0);return d||Math.random()-.5;});
   _newsCache=items.slice(0,35);_newsGenerated=Date.now();
-  if(activePage()==='home')renderNewsAnchor();
+  var _activePg=activePage();
+  if(_activePg==='home'||_activePg==='news') renderNewsAnchor();
   if(typeof renderNewsFeatured==='function')renderNewsFeatured();
   updateNewsTicker();
 }
@@ -404,6 +405,9 @@ function genCross(){
   [5,10,25,50,100].forEach(function(n){if(allPlayed.length===n){var v=V.milestone(n,'ms'+n);items.push(makeStory('all','milestone',80,v[0],v[1][0],v[1].slice(1)));}}); // fix: milestone returns [subline,body[]]
   if(tp>=8)items.push(makeStory('all','community',65,'👥 '+tp+' managers registered across all leagues','eFootball Universe keeps growing — community now at '+tp+' players.',[tp+' managers competing across EPL, La Liga, Serie A and Ligue 1.',
     'The competition gets stronger every week. Tell your friends — this is where it happens. Here we go!']));
+
+  // ── NEW SEASON + MATCHDAY STORIES ────────────────────────────
+  items = items.concat(genSeasonStories());
 
   // ── FRIENDLY MATCH NEWS ──────────────────────────────────────
   items = items.concat(genFriendlyNews());
@@ -595,8 +599,8 @@ function genFriendlyNews() {
 }
 
 // ── RENDER — CARD LIST VIEW ──────────────────────────────────
-var TYPE_ICON={title:'🏆',form:'🔥',crisis:'🚨',podium:'🎯',bottomFight:'📉',penalty:'⚡',cleansheet:'🧤',goals:'⚽',unbeaten:'🛡',result:'📊',upcoming:'📅',activity:'💪',discipline:'⚠',milestone:'🎉',community:'👥'};
-var TYPE_COLOR={title:'#FFE600',form:'#00FF85',crisis:'#FF2882',podium:'#00D4FF',bottomFight:'#FF8C00',penalty:'#FF2882',cleansheet:'#00D4FF',goals:'#FF8C00',unbeaten:'#00FF85',result:'#fff',upcoming:'#FFE600',activity:'#00D4FF',discipline:'#FF2882',milestone:'#FFE600',community:'#00D4FF'};
+var TYPE_ICON={title:'🏆',form:'🔥',crisis:'🚨',podium:'🎯',bottomFight:'📉',penalty:'⚡',cleansheet:'🧤',goals:'⚽',unbeaten:'🛡',result:'📊',upcoming:'📅',activity:'💪',discipline:'⚠',milestone:'🎉',community:'👥',season:'🚀',matchday:'📋',schedule:'📅',friendly:'⚔️',friendlyResult:'⚔️'};
+var TYPE_COLOR={title:'#FFE600',form:'#00FF85',crisis:'#FF2882',podium:'#00D4FF',bottomFight:'#FF8C00',penalty:'#FF2882',cleansheet:'#00D4FF',goals:'#FF8C00',unbeaten:'#00FF85',result:'#fff',upcoming:'#FFE600',activity:'#00D4FF',discipline:'#FF2882',milestone:'#FFE600',community:'#00D4FF',season:'#00FF85',matchday:'#00D4FF',schedule:'#FFE600',friendly:'#FF2882',friendlyResult:'#FF2882'};
 
 function renderNewsAnchor(){
   var el=$('news-anchor-section');if(!el)return;
@@ -779,4 +783,182 @@ function renderNewsFeatured(){
       +'</div>';
   });
   el.innerHTML=html;
+}
+
+// ── NEW SEASON & MATCHDAY PREVIEW STORIES ─────────────────────
+// Generates immediately after auto-schedule, before any matches played.
+// All variants use seed-based picking so same data = same story, never random flicker.
+function genSeasonStories() {
+  var items = [];
+  var allMs = Object.values(allMatches);
+  var scheduled = allMs.filter(function(m){ return !m.played && m.homeId && m.awayId && m.matchTime; });
+  var playedCount = allMs.filter(function(m){ return m.played; }).length;
+  var totalScheduled = scheduled.length;
+  if (!totalScheduled) return items;
+
+  var tp = Object.keys(allPlayers).length;
+  var leagueIds = ['epl','laliga','seriea','ligue1'];
+
+  // Seed helper for deterministic variant picking
+  function seedNum(str) {
+    var h=0; for(var i=0;i<str.length;i++) h=(h*31+str.charCodeAt(i))&0x7FFFFFFF; return h;
+  }
+
+  // ── 1. SEASON KICKOFF (importance 99) — fires when 0 played, 4+ scheduled ──
+  if (playedCount === 0 && totalScheduled >= 4) {
+    var skVars = [
+      { sub: 'The new season is officially live. ' + totalScheduled + ' fixtures confirmed across all leagues.',
+        body: ['eFootball Universe is BACK. The fixtures are set, the schedules are confirmed — and ' + tp + ' managers are ready to fight for glory.', totalScheduled + ' matches have been scheduled across all four leagues. Every matchday is loaded. Every fixture matters.', 'From the opening whistle of Match Day 1, this season will produce drama, upsets, comebacks, and champions. The journey starts now.', 'New season, new targets, new chances. Who walks away with the title? Here we go! ✅'] },
+      { sub: tp + ' managers. ' + totalScheduled + ' fixtures. One season to decide everything.',
+        body: ['The wait is over. eFootball Universe is LIVE — fixtures confirmed, schedules set, managers ready.', 'Every title race begins with a single match. Every trophy starts with Match Day 1. That day is here.', 'The leagues are competitive. The players are hungry. Nobody is giving anything away.', 'What a season this is going to be. Prepare yourselves. Here we go! ✅'] },
+      { sub: 'Fixtures confirmed. The new eFootball Universe season begins right now.',
+        body: ['IT IS HERE. The new season has been officially scheduled — ' + totalScheduled + ' fixtures confirmed, ' + tp + ' managers locked in.', 'EPL, La Liga, Serie A, Ligue 1 — all four leagues are ready to go. The title races begin immediately.', 'From this moment, every result counts. Every point could be the difference between glory and heartbreak.', 'The stage is set. The managers are ready. Let the season begin. Here we go! ✅'] },
+      { sub: 'Season confirmed — ' + totalScheduled + ' fixtures, ' + tp + ' managers. Let the competition begin.',
+        body: ['eFootball Universe has a new season and it is officially live. ' + totalScheduled + ' fixtures confirmed across all leagues.', 'The schedule is out. The matchdays are set. Every manager now knows their path — and their opponents.', 'Title contenders, relegation battlers, dark horses — we will find out who is who from Match Day 1.', 'No excuses. No delays. The season is here. Here we go! ✅'] },
+      { sub: 'The fixtures are out. ' + tp + ' managers enter the arena. Here. We. Go.',
+        body: ['Months of anticipation ends today. eFootball Universe announces a brand new season — ' + totalScheduled + ' fixtures, ' + tp + ' competitors across four elite leagues.', 'Who comes in as favourite? Who is the dark horse nobody is talking about? Match Day 1 will give us the first answers.', 'The title is not decided in pre-season. But ambition — that starts now.', 'The most competitive season yet. Here we go! ✅'] },
+      { sub: 'eFootball Universe Season — LIVE. ' + totalScheduled + ' fixtures across all four leagues.',
+        body: ['New season. New battles. New champions waiting to be crowned.', tp + ' managers have registered across EPL, La Liga, Serie A and Ligue 1. Each one believes they can win. Only the results will tell us who is right.', totalScheduled + ' fixtures have been confirmed. Not a single easy game among them.', 'This is eFootball Universe. This is where reputations are made. Here we go! ✅'] },
+      { sub: 'All ' + tp + ' managers confirmed. Season officially underway with ' + totalScheduled + ' fixtures.',
+        body: ['The registration is done. The fixtures are confirmed. The season is live.', 'From the very first match to the final day, every single result matters in eFootball Universe.', tp + ' managers. ' + totalScheduled + ' matches. Four leagues. One overriding question: who has what it takes?', 'The answer starts on Match Day 1. Here we go! ✅'] },
+      { sub: 'SEASON LAUNCH: ' + totalScheduled + ' games confirmed. The race for glory begins.',
+        body: ['Stop what you are doing. eFootball Universe has a new season — and it starts NOW.', totalScheduled + ' fixtures confirmed across EPL, La Liga, Serie A and Ligue 1. ' + tp + ' managers ready to compete.', 'Last season\'s results mean nothing. Every team starts fresh. Every manager has a point to prove.', 'The only currency that matters now is points on the board. Here we go! ✅'] },
+      { sub: 'A new chapter begins — ' + tp + ' managers, ' + totalScheduled + ' fixtures, four leagues.',
+        body: ['Every great season starts with a simple announcement: the fixtures are out.', 'Today, eFootball Universe delivers exactly that. ' + totalScheduled + ' games confirmed across four leagues. ' + tp + ' managers ready.', 'Some will rise. Some will fall. The title races will twist and turn. But it all starts with Match Day 1.', 'A new chapter in eFootball Universe history. Here we go! ✅'] },
+      { sub: 'Kick off confirmed — ' + totalScheduled + ' fixtures, ' + tp + ' competitors, four leagues of football.',
+        body: ['No more waiting. The eFootball Universe fixture list has been released and the season is officially live.', 'EPL. La Liga. Serie A. Ligue 1. All four leagues confirmed, all fixtures scheduled, all managers ready.', 'The pre-season favourites have been named. The underdogs are quietly preparing. Match Day 1 will sort the reality from the hype.', 'Let the battles begin. Here we go! ✅'] },
+    ];
+    var skSeed = seedNum('season' + totalScheduled + tp);
+    var skV = skVars[skSeed % skVars.length];
+    items.push(makeStory('all','season',99,'🚀 NEW SEASON IS LIVE — ' + tp + ' managers, ' + totalScheduled + ' fixtures!', skV.sub, skV.body));
+  }
+
+  // ── 2. MATCH DAY 1 PREVIEW (importance 97) — per league ──
+  leagueIds.forEach(function(lid) {
+    var lg = LGS[lid]||{};
+    var md1 = allMs.filter(function(m){ return m.league===lid && m.matchDay===1 && !m.played && m.homeId && m.awayId; });
+    if (!md1.length) return;
+    var pairings = md1.map(function(m){
+      var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return null;
+      return hp.username+' ('+hp.club+') vs '+ap.username+' ('+ap.club+')';
+    }).filter(Boolean);
+    if (!pairings.length) return;
+    var firstTime = md1.reduce(function(mn,m){ return (m.matchTime&&m.matchTime<mn)?m.matchTime:mn; }, Infinity);
+    var timeStr = firstTime<Infinity ? fmtFull(firstTime) : 'TBD';
+    var pairStr = pairings.join(' · ');
+
+    var md1Vars = [
+      { sub: 'Match Day 1 confirmed for ' + lg.n + '. ' + md1.length + ' opener'+(md1.length>1?'s':'')+' to launch the season.',
+        body: [lg.n+' kicks off its new season with Match Day 1. The opening fixtures are confirmed — '+md1.length+' match'+(md1.length>1?'es':'')+' that will set the tone for everything that follows.', 'Opening day card: '+pairStr+'.', 'First impressions matter in football. Whoever wins Match Day 1 sends an immediate message to the rest of the league. Bragging rights and early momentum — that is what is at stake.', 'It starts here. '+lg.n+' is open for business. Here we go! ✅'] },
+      { sub: lg.n+' Match Day 1: '+md1.length+' match'+(md1.length>1?'es':'')+' confirmed, kicking off '+timeStr+'.',
+        body: ['The '+lg.n+' season opener is confirmed. Match Day 1 is here — fixtures set, schedules locked.', 'Opening matchups: '+pairStr+'.', 'No form, no momentum — just raw ability and desire. Match Day 1 is the great equaliser. Everyone starts at zero.', 'Every manager begins on zero points. From here, the season is written on the pitch. Here we go! ✅'] },
+      { sub: 'All eyes on '+lg.n+' Match Day 1. The season officially begins.',
+        body: [lg.n+' Match Day 1 is ready. '+md1.length+' opening fixture'+(md1.length>1?'s':'')+' confirmed — this is where the season begins.', 'On the card: '+pairStr+'.', 'Tight title races? A dominant champion? Shock results on opening day? Match Day 1 gives the first clues.', 'The opening whistle is everything. Get ready. Here we go! ✅'] },
+      { sub: lg.n+' gets underway — Match Day 1 schedule confirmed. Here are the openers.',
+        body: ['The '+lg.n+' season is not a future event any more. It is happening now. Match Day 1 is confirmed.', pairings.length+' fixture'+(pairings.length>1?'s':'')+' on opening day: '+pairStr+'.', 'The early results in '+lg.n+' matter enormously. Momentum, confidence, and table position — all established from the very first game.', 'Who makes the best start? We are about to find out. Here we go! ✅'] },
+      { sub: 'It begins. '+lg.n+' Match Day 1 fixtures locked in.',
+        body: ['Circle the date. '+lg.n+' Match Day 1 is official — fixtures confirmed, opponents known, season live.', 'The opening day matchups read: '+pairStr+'.', 'Experience tells you that Match Day 1 rarely goes to the supposed favourite. Upsets happen. Statements are made. The whole picture can shift from the very first whistle.', 'Nobody knows who wins Match Day 1 until it is played. That is why we love it. Here we go! ✅'] },
+      { sub: 'Match Day 1 is everything — '+lg.n+' opens with '+md1.length+' fixture'+(md1.length>1?'s':'')+'.',
+        body: ['There is nothing quite like Match Day 1 in '+lg.n+'. New beginnings. New possibilities. The slate completely clean.', 'Confirmed on the card: '+pairStr+'.', 'The pressure of an opening game in '+lg.n+' is unique. Nobody wants to be bottom after Match Day 1. Nobody wants to let early points slip.', 'The season starts with a statement. Who makes it? Here we go! ✅'] },
+      { sub: lg.n+' Season Opener: '+pairings[0]+(pairings.length>1?' and '+(pairings.length-1)+' more.':'.')+' Match Day 1 confirmed.',
+        body: ['Brand new '+lg.n+' season. Brand new Match Day 1. The fixtures are out and the opening games are set.', 'Full opening day card: '+pairStr+'.', 'Some will say it is just one match day. But the form, confidence, and momentum from Match Day 1 in '+lg.n+' can shape an entire season.', 'It is the most important day of the year. Today is that day. Here we go! ✅'] },
+      { sub: lg.n+' managers: this is your opening day schedule. Match Day 1 confirmed.',
+        body: ['Attention all '+lg.n+' managers. Your opening day fixtures are confirmed. Match Day 1 is live.', 'The matchups: '+pairStr+'.', 'Every manager has spent time preparing for this. The pre-season analysis is done. Now it is about execution.', 'Which team has done their homework? Which manager has the edge? Match Day 1 will answer everything. Here we go! ✅'] },
+      { sub: 'Opening whistle incoming — '+lg.n+' Match Day 1 locked and loaded.',
+        body: ['The longest wait in '+lg.n+' is over. Match Day 1 has been confirmed — the season is officially here.', 'First fixtures: '+pairStr+'.', 'When that first whistle blows in '+lg.n+', everything changes. Pre-season talk becomes irrelevant. The only thing that matters is the result.', 'Who answers the opening day call in '+lg.n+'? Here we go! ✅'] },
+      { sub: lg.n+' Match Day 1 preview: everything you need to know.',
+        body: [lg.n+' has confirmed its opening day fixtures — and the action cannot come quickly enough.', 'Match Day 1 pairings: '+pairStr+'.', 'Each of these games carries enormous weight. Drop points on Match Day 1 in '+lg.n+' and you spend the rest of the season in recovery mode. Win? The whole dynamic shifts in your favour.', 'There are no warm-ups in '+lg.n+'. Here we go! ✅'] },
+    ];
+    var md1Seed = seedNum(lid+'md1'+md1.length+pairings.length);
+    var md1V = md1Vars[md1Seed % md1Vars.length];
+    items.push(makeStory(lid,'matchday',97,'📋 '+lg.n+' Match Day 1: Season opener confirmed', md1V.sub, md1V.body));
+  });
+
+  // ── 3. UPCOMING MATCHDAY PREVIEW (importance scales down) — next unplayed MD per league ──
+  leagueIds.forEach(function(lid) {
+    var lg = LGS[lid]||{};
+    var unplayedMDs = {};
+    allMs.filter(function(m){ return m.league===lid&&!m.played&&m.matchDay&&m.homeId&&m.awayId; })
+      .forEach(function(m){ if(!unplayedMDs[m.matchDay])unplayedMDs[m.matchDay]=[]; unplayedMDs[m.matchDay].push(m); });
+    var mdKeys = Object.keys(unplayedMDs).map(Number).sort(function(a,b){return a-b;});
+    if (!mdKeys.length) return;
+    var nextMD = mdKeys[0];
+    if (nextMD===1) return; // MD1 handled above
+    var fixtures = unplayedMDs[nextMD];
+    var pairings = fixtures.map(function(m){
+      var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return null;
+      return hp.username+' vs '+ap.username;
+    }).filter(Boolean);
+    if (!pairings.length) return;
+    var totalMDs = mdKeys[mdKeys.length-1];
+    var pairStr = pairings.join(' · ');
+
+    var mdpVars = [
+      { sub: lg.n+' Match Day '+nextMD+' is next. '+fixtures.length+' fixture'+(fixtures.length>1?'s':'')+' confirmed.',
+        body: ['After the opening rounds, '+lg.n+' reaches Match Day '+nextMD+'. The season is already taking shape — and the stakes are rising with every game.', 'On the card: '+pairStr+'.', 'By Match Day '+nextMD+', the table tells a story. Some are ahead of schedule, some need to respond. Every point from here shapes the title race.', 'Match Day '+nextMD+' of '+totalMDs+'. The season is moving fast. Here we go! ✅'] },
+      { sub: 'Match Day '+nextMD+' preview: '+pairStr+'.',
+        body: [lg.n+' continues with Match Day '+nextMD+'. The fixtures are confirmed and the pressure is building across the division.', pairings.length+' match'+(pairings.length>1?'es':'')+' on the schedule: '+pairStr+'.', 'The table is starting to crystallise. The early leaders want to extend their advantage. The rest want to close the gap.', 'Match Day '+nextMD+' could swing the '+lg.n+' title race significantly. Watch closely. Here we go! ✅'] },
+      { sub: lg.n+' rolls into Match Day '+nextMD+' — form, pressure, and everything to play for.',
+        body: ['The '+lg.n+' season does not pause. Match Day '+nextMD+' arrives and the fixtures demand attention.', 'Confirmed: '+pairStr+'.', 'By now, trends are emerging in '+lg.n+'. Who is consistent? Who is streaky? Who turns up for the big games? Match Day '+nextMD+' gives us more data.', 'The title picture grows clearer with every game. Here we go! ✅'] },
+      { sub: 'Here comes Match Day '+nextMD+' in '+lg.n+'. The season has momentum now.',
+        body: ['A new matchday. A new set of stories waiting to be written. '+lg.n+' Match Day '+nextMD+' is confirmed.', 'The fixtures: '+pairStr+'.', 'In '+lg.n+', momentum from one matchday carries directly into the next. A win here builds confidence. A loss creates pressure. The stakes never drop.', 'Match Day '+nextMD+'. The title race continues. Here we go! ✅'] },
+      { sub: lg.n+' Match Day '+nextMD+' confirmed — can anyone close the gap at the top?',
+        body: ['The '+lg.n+' table is developing a personality of its own. Now comes Match Day '+nextMD+' — and the opportunity for the chasing pack to strike.', 'Games on deck: '+pairStr+'.', 'At this stage of the '+lg.n+' season, results carry compounding weight. Wins breed confidence. Losses breed questions. Match Day '+nextMD+' is a fork in the road for several teams.', 'Every fixture at Match Day '+nextMD+' has title implications. Here we go! ✅'] },
+      { sub: 'The '+lg.n+' season races forward — Match Day '+nextMD+' is here.',
+        body: ['No break for anyone in '+lg.n+'. Match Day '+nextMD+' has arrived and the managers must deliver again.', 'Fixtures confirmed: '+pairStr+'.', 'The beauty of a long season is that form matters more than individual results. But in '+lg.n+', every single result matters. Including these.', 'Match Day '+nextMD+' of '+totalMDs+' in '+lg.n+'. On we go. Here we go! ✅'] },
+      { sub: 'Match Day '+nextMD+' in '+lg.n+': '+pairings.length+' fixture'+(pairings.length>1?'s':'')+' with massive implications.',
+        body: ['If you thought the '+lg.n+' title race was becoming clear, think again. Match Day '+nextMD+' is here — and nothing is settled yet.', 'On the schedule: '+pairStr+'.', 'Every game has the potential to completely reshape the '+lg.n+' standings. A surprise result here, a key victory there — and the whole picture changes overnight.', 'Match Day '+nextMD+'. Stay locked in. Here we go! ✅'] },
+      { sub: lg.n+' Match Day '+nextMD+': points to be won, points to be lost.',
+        body: ['This is what the '+lg.n+' season is all about — week after week of competitive football where nothing is guaranteed.', 'Match Day '+nextMD+' fixtures: '+pairStr+'.', 'The managers who handle the pressure best will be the ones at the top of the '+lg.n+' table when it matters most. Match Day '+nextMD+' is another examination.', 'Who passes the test? Here we go! ✅'] },
+      { sub: lg.n+' keeps delivering — Match Day '+nextMD+' is on the schedule.',
+        body: ['The '+lg.n+' fixture machine rolls on. Match Day '+nextMD+' is confirmed and the games are ready to be played.', 'Upcoming: '+pairStr+'.', 'Somewhere in these fixtures, the '+lg.n+' title race will be nudged in one direction or another. A result nobody expected. A performance that turns heads.', 'That is what eFootball Universe does. That is why we are here. Here we go! ✅'] },
+      { sub: lg.n+' title race update: Match Day '+nextMD+' fixtures revealed.',
+        body: ['The '+lg.n+' title race context matters here. Match Day '+nextMD+' has been confirmed — and the fixtures have everything.', 'Full matchday schedule: '+pairStr+'.', 'Some of these games look straightforward on paper. They never are. That is the lesson of '+lg.n+' every single season.', 'Expect the unexpected. Match Day '+nextMD+' awaits. Here we go! ✅'] },
+    ];
+    var mdpSeed = seedNum(lid+'mdp'+nextMD+fixtures.length);
+    var mdpV = mdpVars[mdpSeed % mdpVars.length];
+    var imp = Math.max(70, 94 - nextMD * 2);
+    items.push(makeStory(lid,'matchday',imp,'📋 '+lg.n+' Match Day '+nextMD+' preview', mdpV.sub, mdpV.body));
+  });
+
+  // ── 4. FULL SEASON SCHEDULE CONFIRMED (importance 88) — once, 0 played ──
+  if (playedCount===0 && totalScheduled>=4) {
+    leagueIds.forEach(function(lid) {
+      var lg=LGS[lid]||{};
+      var lgMs=allMs.filter(function(m){return m.league===lid&&m.matchDay;});
+      if (!lgMs.length) return;
+      var mds={}; lgMs.forEach(function(m){mds[m.matchDay]=true;});
+      var mdCount=Object.keys(mds).length;
+      var pCount=Object.values(allPlayers).filter(function(p){return p.league===lid;}).length;
+      if (!mdCount||!pCount) return;
+
+      var schVars = [
+        { sub: pCount+' managers. '+lgMs.length+' fixtures across '+mdCount+' match days. One champion.',
+          body: ['The '+lg.n+' season is fully scheduled. '+pCount+' managers, '+lgMs.length+' fixtures, '+mdCount+' match days — the road to the title is mapped out.', 'Home and away — every manager faces every other twice. There are no easy games in '+lg.n+'.', 'One champion will emerge. But right now? Everyone has a chance. Everyone starts equal.', 'The schedule is set. The season is real. Here we go! ✅'] },
+        { sub: lg.n+' — '+mdCount+' match days, '+lgMs.length+' fixtures. Full season confirmed.',
+          body: ['The '+lg.n+' calendar is out. '+mdCount+' match days, '+lgMs.length+' total fixtures — home and away across the full season.', 'Every manager knows their games. Every matchup is confirmed. The path to the '+lg.n+' title is clear.', 'Who has the toughest run of fixtures? Who has the opening that suits them? Study the schedule carefully.', 'The season waits for no one. Here we go! ✅'] },
+        { sub: lg.n+' fixture list out — '+lgMs.length+' games confirmed for all '+pCount+' managers.',
+          body: ['The '+lg.n+' season has a structure. '+lgMs.length+' fixtures across '+mdCount+' match days — every game confirmed, every opponent known.', 'This is the moment every manager has been waiting for. Now the real preparation can begin.', 'Analyse the schedule. Identify the key fixtures. Plan for the tough runs. The detail is everything in '+lg.n+'.', 'The full '+lg.n+' fixture list is out. Here we go! ✅'] },
+        { sub: 'The '+lg.n+' season blueprint: '+mdCount+' matchdays, '+lgMs.length+' fixtures, '+pCount+' competitors.',
+          body: ['A new '+lg.n+' season needs a fixture list. That list is now confirmed — '+lgMs.length+' games across '+mdCount+' match days.', pCount+' managers will face each other home and away. Every strength will be tested. Every weakness exposed.', 'The blueprint is public. The targets are set. Now it is about execution.', 'The '+lg.n+' season is open. Here we go! ✅'] },
+        { sub: 'All '+lgMs.length+' '+lg.n+' fixtures confirmed. The season map is drawn.',
+          body: ['Mark your calendars. All '+lgMs.length+' '+lg.n+' fixtures have been confirmed across '+mdCount+' match days.', 'For '+pCount+' managers, this is everything. The opponents are known. The schedule is set. The excuses are gone.', 'Every match day in '+lg.n+' builds toward one final truth: a champion. Who will it be?', 'The map is drawn. Now walk the road. Here we go! ✅'] },
+        { sub: lg.n+' season structure confirmed: '+pCount+' teams, '+mdCount+' match days, '+lgMs.length+' battles.',
+          body: ['Before the first ball is kicked in '+lg.n+', the season structure has been confirmed. '+lgMs.length+' fixtures. '+mdCount+' match days.', 'Every manager will play '+Math.round(lgMs.length/Math.max(pCount,1)*2)+' games home and away. Nobody gets an easy run.', 'This is not a knockout. It is a marathon. '+mdCount+' match days of grinding, winning, and fighting for position.', 'The strongest over the season wins. That is the beauty of it. Here we go! ✅'] },
+        { sub: lg.n+' is ready — fixtures, matchdays, and everything confirmed for the new season.',
+          body: ['From the first match to the last, the '+lg.n+' season has been mapped out completely. '+lgMs.length+' fixtures across '+mdCount+' match days.', pCount+' managers know their schedule. The early fixtures look manageable. The run-ins will be brutal.', 'In '+lg.n+', you win the title by surviving every match day — not just the big ones.', 'Season confirmed. Let the grind begin. Here we go! ✅'] },
+        { sub: 'Fixture release day for '+lg.n+' — '+lgMs.length+' games, '+mdCount+' matchdays, one trophy.',
+          body: ['It is fixture release day for '+lg.n+'. '+lgMs.length+' games have been confirmed across '+mdCount+' match days.', 'The '+pCount+' managers in '+lg.n+' now have everything they need to prepare. Schedule analysed. Key games identified. Targets set.', 'One match at a time. One match day at a time. That is how you win '+lg.n+'.', 'The fixtures are out. The season is here. Here we go! ✅'] },
+        { sub: lg.n+' full schedule: '+mdCount+' match days, every fixture confirmed.',
+          body: ['The '+lg.n+' schedule is complete — '+lgMs.length+' fixtures confirmed across '+mdCount+' match days for '+pCount+' competing managers.', 'Study the opening games carefully. Early momentum in '+lg.n+' is crucial. But the run-in always decides the champion.', 'Every manager will have games they are looking forward to and games they are dreading. That balance makes a season great.', 'The full schedule is confirmed. Here we go! ✅'] },
+        { sub: lg.n+' season officially mapped out — '+lgMs.length+' fixtures for '+pCount+' managers.',
+          body: ['Official. Complete. Confirmed. The '+lg.n+' season is fully scheduled — '+lgMs.length+' matches across '+mdCount+' match days.', 'From the very first matchday to the last, '+pCount+' managers will be fighting for every point in '+lg.n+'.', 'The title will not be decided on fixture release day. But preparations begin right here, right now.', 'The '+lg.n+' season is ready. Are you? Here we go! ✅'] },
+      ];
+      var schSeed = seedNum(lid+'sch'+mdCount+pCount+lgMs.length);
+      var schV = schVars[schSeed % schVars.length];
+      items.push(makeStory(lid,'schedule',88,'📅 '+lg.n+' — Full season fixture list confirmed', schV.sub, schV.body));
+    });
+  }
+
+  return items;
 }

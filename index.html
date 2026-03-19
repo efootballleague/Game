@@ -391,6 +391,12 @@ select.inp option{background:#0e0018;color:var(--text)}
 .uchip{font-size:.76rem;font-weight:700;color:var(--cyan);cursor:pointer;padding:.3rem .6rem;border-radius:8px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);transition:.15s}
 .uchip:hover{background:rgba(0,212,255,0.15)}
 
+/* News ticker */
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.news-ticker-item{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--text);white-space:nowrap;cursor:pointer;padding:0 .5rem}
+.news-ticker-item:hover{color:var(--cyan)}
+.news-ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0}
+
 /* News animations */
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scalein{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
@@ -511,6 +517,14 @@ select.inp option{background:#0e0018;color:var(--text)}
       <div class="stat-box"><div class="stat-val" id="st-f">-</div><div class="stat-lbl">Fixtures</div></div>
       <div class="stat-box"><div class="stat-val" id="online-count">-</div><div class="stat-lbl">Online</div></div>
     </div>
+    <div id="news-ticker-bar" style="display:none;overflow:hidden;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:10px;padding:.45rem .6rem;margin-bottom:.6rem;position:relative">
+      <div style="display:flex;align-items:center;gap:.5rem;overflow:hidden">
+        <span style="font-family:Orbitron,sans-serif;font-size:.52rem;font-weight:700;color:#00D4FF;letter-spacing:1px;white-space:nowrap;flex-shrink:0">📰 LIVE</span>
+        <div style="overflow:hidden;flex:1">
+          <div id="news-ticker-track" style="display:flex;gap:1.5rem;white-space:nowrap;animation:tickerScroll 30s linear infinite"></div>
+        </div>
+      </div>
+    </div>
     <div id="news-featured" style="margin-bottom:.8rem"></div>
     <div class="section-header"><div class="section-title c-green">Recent Results</div><div class="section-line green"></div></div>
     <div class="grid2" id="recent-res"><div class="card empty">No results yet.</div></div>
@@ -575,7 +589,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <!-- FRIENDLY -->
   <div class="page" id="page-friendly"></div>
   <!-- UCL -->
-  <div class="page" id="page-ucl"><div class="card empty" style="margin-top:1rem">UCL coming in Batch 3</div></div>
+  <div class="page" id="page-ucl"></div>
   <!-- REFEREE -->
   <div class="page" id="page-referee"></div>
   <!-- LEADERBOARD -->
@@ -591,7 +605,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications"></div>
   <!-- ADMIN -->
-  <div class="page" id="page-admin"><div class="card empty" style="margin-top:1rem">Admin Panel coming in Batch 3</div></div>
+  <div class="page" id="page-admin"></div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -606,8 +620,8 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div class="nb-center-ring"><svg viewBox="0 0 24 24" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
     <span>Match</span><span class="nb-badge hidden" id="matchroom-badge"></span>
   </button>
-  <button class="nb" data-page="predict" onclick="goPage('predict')">
-    <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Predict</span>
+  <button class="nb" data-page="news" onclick="goPage('news')">
+    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v2"/><path d="M4 11H2v11h2a2 2 0 0 0 2-2V13a2 2 0 0 0-2-2z"/><line x1="8" y1="7" x2="18" y2="7"/><line x1="8" y1="11" x2="18" y2="11"/><line x1="8" y1="15" x2="14" y2="15"/></svg><span>News</span>
   </button>
   <button class="nb" data-page="fixtures" onclick="goPage('fixtures')">
     <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Fixtures</span>
@@ -741,6 +755,7 @@ select.inp option{background:#0e0018;color:var(--text)}
     if (name === 'chat')          renderMessenger();
     if (name === 'predict')       renderPredictions();
     if (name === 'notifications') renderNotifications();
+    if (name === 'friendly')      { if(typeof renderFriendlyPage==='function') renderFriendlyPage(); }
     // referee and profile ARE already handled in core.js — don't call again
     // Show/hide chat FAB
     var fab = document.getElementById('chat-fab');

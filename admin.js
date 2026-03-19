@@ -234,8 +234,9 @@ function loadAdminMatches() {
       + '<div style="font-size:.62rem;color:var(--dim);margin-bottom:.3rem">'+mdLabel+(m.played?'FT: '+m.hg+'-'+m.ag:(m.matchTime?fmtFull(m.matchTime):'Unscheduled'))+(m.refereeName?' · Ref: '+esc(m.refereeName):'')+(m.postponed?' · <span style="color:#ff6b00">POSTPONED</span>':'')+'</div>'
       + (m.pendingResult&&!m.played?'<div style="font-size:.68rem;color:var(--gold);margin-bottom:.3rem">⏳ Pending review</div>':'')
       + '<div style="display:flex;gap:.3rem;flex-wrap:wrap">'
-      + (!m.played?'<button class="btn-xs" onclick="adminApproveResult(\''+m.id+'\')">Approve</button>':'')
+      + (!m.played&&m.pendingResult?'<button class="btn-xs" onclick="adminApproveResult(\''+m.id+'\')">Approve</button>':'')
       + (!m.played?'<button class="btn-xs" onclick="adminForceResult(\''+m.id+'\')">Force Result</button>':'')
+      + (m.played?'<button class="btn-xs" style="color:var(--gold);border-color:rgba(255,230,0,0.3)" onclick="adminForceResult(\''+m.id+'\')">✏️ Edit Result</button>':'')
       + '<button class="btn-xs" onclick="adminRescheduleMatch(\''+m.id+'\')">Reschedule</button>'
       + (!m.played&&!m.postponed?'<button class="btn-xs" style="color:#ff6b00;border-color:rgba(255,107,0,0.3)" onclick="adminPostponeMatch(\''+m.id+'\')">Postpone</button>':'')
       + (m.postponed?'<button class="btn-xs" onclick="undoPostpone(\''+m.id+'\')">Undo Postpone</button>':'')
@@ -263,11 +264,32 @@ function adminDeleteMatch(mid){
 }
 
 function adminForceResult(mid) {
-  var hg = prompt('Home goals:','0'); if (hg===null) return;
-  var ag = prompt('Away goals:','0'); if (ag===null) return;
-  hg = parseInt(hg)||0; ag = parseInt(ag)||0;
-  db.ref(DB.matches+'/'+mid).update({played:true,hg:hg,ag:ag,playedAt:Date.now(),pendingResult:false,refStatus:'admin_forced'})
-    .then(function(){ toast('Result forced: '+hg+'-'+ag); loadAdminMatches(); if(typeof checkSeasonEnd==='function')checkSeasonEnd(); });
+  if (!me || me.email !== ADMIN_EMAIL) return;
+  var m = allMatches[mid]; if (!m) return;
+  // Pre-fill with existing score if already played so admin can edit it
+  var hgStr = prompt('Home goals:', m.hg !== undefined ? m.hg : (m.pendingHg || 0));
+  if (hgStr === null) return;
+  var agStr = prompt('Away goals:', m.ag !== undefined ? m.ag : (m.pendingAg || 0));
+  if (agStr === null) return;
+  var hg = parseInt(hgStr), ag = parseInt(agStr);
+  if (isNaN(hg) || isNaN(ag) || hg < 0 || ag < 0) { toast('Invalid scores.', 'error'); return; }
+  db.ref(DB.matches + '/' + mid).update({
+    played:        true,
+    hg:            hg,
+    ag:            ag,
+    playedAt:      m.playedAt || Date.now(),
+    pendingResult: false,
+    awayVerifying: false,
+    awayDispute:   false,
+    refStatus:     'admin_forced',
+    forcedBy:      me.uid,
+    forcedAt:      Date.now()
+  }).then(function() {
+    toast('Result set: ' + hg + '-' + ag);
+    loadAdminMatches();
+    if (typeof notifyBothPlayers === 'function') notifyBothPlayers(mid, 'Admin updated result: ' + hg + '-' + ag + '.');
+    if (typeof checkSeasonEnd === 'function') checkSeasonEnd();
+  }).catch(function() { toast('Failed. Try again.', 'error'); });
 }
 
 function adminRescheduleMatch(mid) {
