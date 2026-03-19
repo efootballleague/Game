@@ -82,6 +82,217 @@ function switchLg(lid, btn) {
   renderStd(lid);
 }
 
+// ── EVENTS PAGE — Country groups with league + cup ────────────
+// State for events nav
+var _evCountry = null;   // e.g. 'England'
+var _evType    = null;   // 'league' or 'cup'
+var _evId      = null;   // e.g. 'epl' or 'fa_cup'
+
+function renderEventsPage() {
+  var pg = $('page-leagues'); if (!pg) return;
+  if (!_evCountry) {
+    // Show country picker
+    _renderCountryPicker();
+  } else if (!_evType) {
+    // Show events for country
+    _renderCountryEvents();
+  } else if (_evType === 'league') {
+    _renderLeagueView();
+  } else if (_evType === 'cup') {
+    _renderCupView();
+  }
+}
+
+function _renderCountryPicker() {
+  var pg = $('page-leagues'); if (!pg) return;
+  if (typeof COUNTRY_GROUPS === 'undefined') { renderStd('epl'); return; }
+  var html = '<div class="section-header"><div class="section-title c-cyan">🌍 Events</div><div class="section-line"></div></div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.3rem">';
+  COUNTRY_GROUPS.forEach(function(cg) {
+    html += '<div onclick="evSelectCountry('' + esc(cg.name) + '')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem .8rem;text-align:center;cursor:pointer;transition:.2s;active:background:rgba(0,212,255,0.1)">'
+      + '<div style="font-size:2rem;margin-bottom:.4rem">' + cg.flag + '</div>'
+      + '<div style="font-family:Orbitron,sans-serif;font-size:.76rem;font-weight:700;color:var(--text)">' + esc(cg.name) + '</div>'
+      + '<div style="font-size:.62rem;color:var(--dim);margin-top:.2rem">' + cg.events.length + ' competition' + (cg.events.length>1?'s':'') + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  pg.innerHTML = html;
+}
+
+function evSelectCountry(name) {
+  _evCountry = name; _evType = null; _evId = null;
+  _renderCountryEvents();
+}
+
+function _renderCountryEvents() {
+  var pg = $('page-leagues'); if (!pg) return;
+  if (typeof COUNTRY_GROUPS === 'undefined') { renderStd('epl'); return; }
+  var cg = COUNTRY_GROUPS.find(function(c){ return c.name === _evCountry; });
+  if (!cg) { _evCountry=null; _renderCountryPicker(); return; }
+
+  var html = '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem">'
+    + '<button onclick="evBack()" class="bs" style="font-size:.7rem;padding:5px 10px">← Back</button>'
+    + '<span style="font-size:1.2rem">' + cg.flag + '</span>'
+    + '<div style="font-family:Orbitron,sans-serif;font-size:.82rem;font-weight:700">' + esc(cg.name) + '</div>'
+    + '</div>';
+
+  cg.events.forEach(function(ev) {
+    var isLeague = ev.type === 'league';
+    var lg = isLeague ? (LGS[ev.id]||{}) : null;
+    var cup = !isLeague ? ((typeof CUPS!=='undefined'?CUPS[ev.id]:null)||{}) : null;
+    var color = isLeague ? (lg.c||'var(--cyan)') : (cup.c||'var(--gold)');
+    var bg    = isLeague ? (lg.bg||'rgba(0,212,255,0.06)') : (cup.bg||'rgba(255,230,0,0.06)');
+
+    // Quick stats
+    var statsHtml = '';
+    if (isLeague) {
+      var players = Object.values(allPlayers).filter(function(p){ return p.league===ev.id; }).length;
+      var played  = Object.values(allMatches).filter(function(m){ return m.league===ev.id&&m.played&&!m.cupId; }).length;
+      var total   = Object.values(allMatches).filter(function(m){ return m.league===ev.id&&!m.cupId; }).length;
+      statsHtml = players + ' players · ' + played + '/' + total + ' played';
+    } else if (cup) {
+      var cupMs = Object.values(allMatches).filter(function(m){ return m.cupId===ev.id; }).length;
+      statsHtml = cupMs ? cupMs + ' fixture' + (cupMs>1?'s':'') + ' drawn' : 'Draw pending';
+    }
+
+    html += '<div onclick="evSelectEvent('' + ev.type + '','' + ev.id + '')" style="background:' + bg + ';border:1px solid ' + color + '33;border-radius:14px;padding:1rem;margin-bottom:.6rem;cursor:pointer;transition:.2s">'
+      + '<div style="display:flex;align-items:center;gap:.7rem">'
+      + '<span style="font-size:1.6rem">' + ev.icon + '</span>'
+      + '<div style="flex:1">'
+      + '<div style="font-family:Orbitron,sans-serif;font-size:.82rem;font-weight:700;color:' + color + '">' + esc(ev.label) + '</div>'
+      + '<div style="font-size:.64rem;color:var(--dim);margin-top:2px">' + statsHtml + '</div>'
+      + '</div>'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="' + color + '" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>'
+      + '</div></div>';
+  });
+
+  pg.innerHTML = html;
+}
+
+function evSelectEvent(type, id) {
+  _evType = type; _evId = id;
+  if (type === 'league') _renderLeagueView();
+  else _renderCupView();
+}
+
+function evBack() {
+  if (_evType) { _evType = null; _evId = null; _renderCountryEvents(); }
+  else { _evCountry = null; _renderCountryPicker(); }
+}
+
+function _renderLeagueView() {
+  var pg = $('page-leagues'); if (!pg) return;
+  var lid = _evId;
+  var lg  = LGS[lid]||{};
+  curLg   = lid;
+
+  var rows  = computeStd(lid);
+  var total = rows.length;
+  var tableRows = '';
+  if (!rows.length) {
+    tableRows = '<tr><td colspan="12" style="padding:1.6rem;color:var(--dim);text-align:center">No players in this league yet.</td></tr>';
+  } else {
+    rows.forEach(function(r, i) {
+      var pos = i + 1;
+      var pc  = pos===1?'#FFE600':pos<=4?'#00d4ff':pos>total-3?'#FF2882':'var(--dim)';
+      var gd  = r.gf-r.ga;
+      var gdc = gd>0?'#00ff88':gd<0?'#FF2882':'var(--dim)';
+      var form = r.form.slice(-5).map(function(f){return'<span class="fd '+f+'"></span>';}).join('');
+      var penBadge = r.penPts>0?'<span class="deduct-badge">-'+r.penPts+'</span>':'';
+      var dot = '<span data-lastseen="'+r.lastSeen+'" style="width:7px;height:7px;border-radius:50%;background:'+lsColor(r.lastSeen)+';display:inline-block;margin-right:3px"></span>';
+      tableRows += '<tr onclick="openUserModal(''+r.uid+'')" style="cursor:pointer">'
+        +'<td><span style="font-family:Orbitron,sans-serif;font-weight:700;font-size:.72rem;color:'+pc+'">'+pos+'</span></td>'
+        +'<td>'+dot+'<strong>'+esc(r.name)+'</strong> <span style="font-size:.58rem;color:var(--dim)">'+esc(r.country)+'</span></td>'
+        +'<td><div style="display:flex;align-items:center;gap:5px">'+clubBadge(r.club,lid,20)+'<span style="font-size:.73rem;color:#aaa">'+esc(r.club)+'</span></div></td>'
+        +'<td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td>'
+        +'<td>'+r.gf+'</td><td>'+r.ga+'</td>'
+        +'<td style="color:'+gdc+'">'+(gd>0?'+':'')+gd+'</td>'
+        +'<td>'+form+'</td>'
+        +'<td><span style="font-family:Orbitron,sans-serif;font-weight:900;font-size:.82rem;color:'+(r.penPts>0?'#FF2882':'#fff')+'">'+r.pts+'</span>'+penBadge+'</td>'
+        +'</tr>';
+    });
+  }
+
+  var html = '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem">'
+    + '<button onclick="evBack()" class="bs" style="font-size:.7rem;padding:5px 10px">← Back</button>'
+    + '<span style="font-size:1rem">' + (lg.f||'') + '</span>'
+    + '<div style="font-family:Orbitron,sans-serif;font-size:.78rem;font-weight:700;color:' + (lg.c||'var(--cyan)') + '">' + esc(lg.n||lid) + '</div>'
+    + '</div>'
+    + '<div class="table-wrap"><table class="standings-table">'
+    + '<thead><tr><th>#</th><th>Player</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Form</th><th>Pts</th></tr></thead>'
+    + '<tbody>' + tableRows + '</tbody>'
+    + '</table></div>'
+    + '<div class="legend" style="margin-top:.7rem"><span>🥇 Champion</span><span style="color:#00d4ff">UCL (top 4)</span><span style="color:#FF2882">Bottom 3</span></div>';
+
+  pg.innerHTML = html;
+}
+
+function _renderCupView() {
+  var pg = $('page-leagues'); if (!pg) return;
+  if (typeof CUPS === 'undefined') { evBack(); return; }
+  var cupId = _evId;
+  var cup   = CUPS[cupId];
+  if (!cup) { evBack(); return; }
+
+  var cupMs    = Object.values(allMatches).filter(function(m){ return m.cupId===cupId; });
+  var played   = cupMs.filter(function(m){ return m.played; });
+  var upcoming = cupMs.filter(function(m){ return !m.played && m.homeId && m.awayId; });
+
+  var html = '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.7rem">'
+    + '<button onclick="evBack()" class="bs" style="font-size:.7rem;padding:5px 10px">← Back</button>'
+    + '<span style="font-size:1rem">' + (cup.f||'') + '</span>'
+    + '<div style="font-family:Orbitron,sans-serif;font-size:.78rem;font-weight:700;color:' + (cup.c||'var(--gold)') + '">' + esc(cup.n) + '</div>'
+    + '</div>';
+
+  if (!cupMs.length) {
+    html += '<div class="card empty" style="margin-top:.5rem">'
+      + '<div style="font-size:1.5rem;margin-bottom:.5rem">🎱</div>'
+      + '<div style="font-weight:700;margin-bottom:.3rem">Draw not yet made</div>'
+      + '<div style="font-size:.74rem;color:var(--dim)">Admin will run the cup draw soon. Check back after the league season is underway.</div>'
+      + '</div>';
+    pg.innerHTML = html;
+    return;
+  }
+
+  // Upcoming fixtures
+  if (upcoming.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--gold);letter-spacing:1.5px;margin:.6rem 0 .4rem">UPCOMING — ' + esc((upcoming[0]||{}).cupRoundName||'Round 1') + '</div>';
+    upcoming.forEach(function(m) {
+      var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return;
+      html += '<div class="card" style="padding:.85rem;margin-bottom:.4rem">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">'
+        + '<div style="flex:1;text-align:center">'+clubBadge(hp.club,m.league,30)+'<div style="font-size:.72rem;font-weight:700;margin-top:3px">'+esc(hp.username)+'</div></div>'
+        + '<div style="font-family:Orbitron,sans-serif;font-size:.8rem;font-weight:900;color:var(--gold)">vs</div>'
+        + '<div style="flex:1;text-align:center">'+clubBadge(ap.club,m.league,30)+'<div style="font-size:.72rem;font-weight:700;margin-top:3px">'+esc(ap.username)+'</div></div>'
+        + '</div>'
+        + (m.matchTime?'<div style="font-size:.62rem;color:var(--dim);text-align:center;margin-top:.4rem">📅 '+fmtFull(m.matchTime)+'</div>':'')
+        + '</div>';
+    });
+  }
+
+  // Played results
+  if (played.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--green);letter-spacing:1.5px;margin:.8rem 0 .4rem">RESULTS</div>';
+    played.slice().reverse().forEach(function(m) {
+      var hp=allPlayers[m.homeId], ap=allPlayers[m.awayId]; if(!hp||!ap) return;
+      var win = m.hg>m.ag?hp:m.ag>m.hg?ap:null;
+      html += '<div class="card" style="padding:.8rem;margin-bottom:.4rem">'
+        + '<div style="display:flex;align-items:center;gap:.5rem">'
+        + '<div style="flex:1;text-align:center;opacity:'+(win&&win.uid===ap.uid?.5:1)+'">'+clubBadge(hp.club,m.league,26)+'<div style="font-size:.68rem;font-weight:700;margin-top:2px">'+esc(hp.username)+'</div></div>'
+        + '<div style="text-align:center;padding:4px 10px;background:rgba(0,0,0,0.3);border-radius:7px">'
+        +   '<div style="font-family:Orbitron,sans-serif;font-size:.95rem;font-weight:900;color:var(--green)">'+m.hg+'-'+m.ag+'</div>'
+        +   '<div style="font-size:.52rem;color:var(--dim)">FT</div>'
+        + '</div>'
+        + '<div style="flex:1;text-align:center;opacity:'+(win&&win.uid===hp.uid?.5:1)+'">'+clubBadge(ap.club,m.league,26)+'<div style="font-size:.68rem;font-weight:700;margin-top:2px">'+esc(ap.username)+'</div></div>'
+        + '</div>'
+        + (win?'<div style="text-align:center;font-size:.62rem;color:var(--green);margin-top:.3rem">✓ '+esc(win.username)+' advances</div>':'')
+        + '</div>';
+    });
+  }
+
+  pg.innerHTML = html;
+}
+
 // ── HOME STATS ────────────────────────────────────────────────
 function renderHomeStats() {
   var ps = Object.keys(allPlayers).length;

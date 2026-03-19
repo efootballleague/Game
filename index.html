@@ -524,22 +524,9 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div id="news-anchor-section"></div>
   </div>
 
-  <!-- LEAGUES -->
+  <!-- EVENTS (Leagues + Cups) -->
   <div class="page" id="page-leagues">
-    <div class="section-header"><div class="section-title c-cyan">Standings</div><div class="section-line"></div></div>
-    <div class="lg-tabs" id="lg-tabs">
-      <button class="lgtab active" data-lid="epl" onclick="switchLg('epl',this)">EPL</button>
-      <button class="lgtab" data-lid="laliga" onclick="switchLg('laliga',this)">La Liga</button>
-      <button class="lgtab" data-lid="seriea" onclick="switchLg('seriea',this)">Serie A</button>
-      <button class="lgtab" data-lid="ligue1" onclick="switchLg('ligue1',this)">Ligue 1</button>
-    </div>
-    <div class="table-wrap">
-      <table class="standings-table">
-        <thead><tr><th>#</th><th>Player</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Form</th><th>Pts</th></tr></thead>
-        <tbody id="std-body"><tr><td colspan="12" style="padding:1.6rem;color:var(--dim);text-align:center">No players yet.</td></tr></tbody>
-      </table>
-    </div>
-    <div class="legend"><span>Gold = Champion</span><span>Blue = UCL (2-4)</span><span>Red = Bottom 3</span></div>
+    <!-- Rendered dynamically by renderEventsPage() in pages.js -->
   </div>
 
   <!-- FIXTURES -->
@@ -636,8 +623,8 @@ select.inp option{background:#0e0018;color:var(--text)}
     <span>Home</span>
   </button>
   <button class="nb" data-page="leagues" onclick="goPage('leagues')">
-    <svg viewBox="0 0 24 24" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-    <span>Leagues</span>
+    <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <span>Events</span>
   </button>
   <button class="nb nb-center" data-page="matchprep" onclick="goPage('matchprep')">
     <div class="nb-center-ring">
@@ -719,7 +706,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('report-mo')">✕</button>
     <h3 class="modal-title">Report User</h3>
-    <input type="hidden" id="rep-uid"><input type="hidden" id="rep-uname">
+    <input type="hidden" id="rep-uid"><input type="hidden" id="rep-uname"><input type="hidden" id="rep-mid">
     <div class="form-group"><label class="lbl">Reporting</label><div id="rep-who" class="report-who"></div></div>
     <div class="form-group"><label class="lbl">Reason</label><select class="inp" id="rep-reason"><option value="">— Select —</option><option>Match result fraud</option><option>Abusive language</option><option>No-show for match</option><option>Unsportsmanlike conduct</option><option>Spam</option><option>Other</option></select></div>
     <div class="form-group"><label class="lbl">Details</label><textarea class="inp" id="rep-details" rows="3" placeholder="Describe what happened..."></textarea></div>

@@ -163,3 +163,74 @@ var COUNTRIES = [
 // ── PUSH NOTIFICATION VAPID KEY ───────────────────────────────
 // Get this from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
 var FCM_VAPID_KEY = '';
+
+// ── CUP COMPETITIONS ─────────────────────────────────────────
+// Each cup is tied to a country/league group
+// Format: knockout, single-leg or two-leg, open to all players in that league
+var CUPS = {
+  fa_cup: {
+    n:'FA Cup', short:'FA Cup', f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    c:'#00ff85', bg:'rgba(0,255,133,0.08)',
+    league:'epl',  // which league players compete
+    rounds:['Round 1','Round 2','Quarter Final','Semi Final','Final'],
+    logo:'https://upload.wikimedia.org/wikipedia/en/6/6d/FA_Cup_logo.svg'
+  },
+  copa_rey: {
+    n:'Copa del Rey', short:'Copa Rey', f:'🇪🇸',
+    c:'#ff4b00', bg:'rgba(255,75,0,0.10)',
+    league:'laliga',
+    rounds:['Round 1','Round 2','Quarter Final','Semi Final','Final'],
+    logo:'https://upload.wikimedia.org/wikipedia/commons/d/d0/Copa_del_Rey_logo.svg'
+  },
+  coppa_italia: {
+    n:'Coppa Italia', short:'Coppa', f:'🇮🇹',
+    c:'#1a56db', bg:'rgba(26,86,219,0.10)',
+    league:'seriea',
+    rounds:['Round 1','Round 2','Quarter Final','Semi Final','Final'],
+    logo:'https://upload.wikimedia.org/wikipedia/en/8/8a/Coppa_Italia_logo.svg'
+  },
+  coupe_france: {
+    n:'Coupe de France', short:'Coupe FR', f:'🇫🇷',
+    c:'#daa520', bg:'rgba(218,165,32,0.10)',
+    league:'ligue1',
+    rounds:['Round 1','Round 2','Quarter Final','Semi Final','Final'],
+    logo:'https://upload.wikimedia.org/wikipedia/fr/d/d1/Logo_Coupe_de_France.svg'
+  }
+};
+
+// ── COUNTRY GROUPS ───────────────────────────────────────────
+// Groups leagues + cups by country for the Events nav
+var COUNTRY_GROUPS = [
+  {
+    name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    events: [
+      { type:'league', id:'epl',          label:'Premier League',   icon:'🏆' },
+      { type:'cup',    id:'fa_cup',        label:'FA Cup',           icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }
+    ]
+  },
+  {
+    name: 'Spain', flag: '🇪🇸',
+    events: [
+      { type:'league', id:'laliga',        label:'La Liga',          icon:'🏆' },
+      { type:'cup',    id:'copa_rey',      label:'Copa del Rey',     icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }
+    ]
+  },
+  {
+    name: 'Italy', flag: '🇮🇹',
+    events: [
+      { type:'league', id:'seriea',        label:'Serie A',          icon:'🏆' },
+      { type:'cup',    id:'coppa_italia',  label:'Coppa Italia',     icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }
+    ]
+  },
+  {
+    name: 'France', flag: '🇫🇷',
+    events: [
+      { type:'league', id:'ligue1',        label:'Ligue 1',          icon:'🏆' },
+      { type:'cup',    id:'coupe_france',  label:'Coupe de France',  icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿' }
+    ]
+  }
+];
+
+// ── DB PATHS (additions) ─────────────────────────────────────
+DB.cups     = 'ef_cups';       // cup draws & results
+DB.cupRound = 'ef_cup_rounds'; // current round per cup

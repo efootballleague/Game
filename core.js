@@ -179,7 +179,7 @@ function goPage(name) {
   var nb=document.querySelector('.nb[data-page="'+name+'"]'); if(nb) nb.classList.add('active');
 
   // Page actions
-  if(name==='leagues')     { renderStd(curLg); }
+  if(name==='leagues')     { if(typeof renderEventsPage==='function') renderEventsPage(); else renderStd(curLg); }
   if(name==='news')        { if(typeof renderNewsAnchor==='function') renderNewsAnchor(); }
   if(name==='fixtures')    { renderFx(); }
   if(name==='matchprep')   { renderMatchPrep(); renderMatchRooms(); renderSchedTimeline(); if(typeof render15MinNotice==='function') render15MinNotice(); }
@@ -294,7 +294,7 @@ function refreshAll(){
   renderHomeStats();
   var pg=activePage();
   if(pg==='home')      {renderRecentRes();renderTopPlayers();if(typeof renderNewsFeatured==='function')renderNewsFeatured();}
-  else if(pg==='leagues')  renderStd(curLg);
+  else if(pg==='leagues')  { if(typeof renderEventsPage==='function') renderEventsPage(); else renderStd(curLg); }
   else if(pg==='fixtures') renderFx();
   else if(pg==='matchprep'){renderMatchPrep();renderSchedTimeline();}
   else if(pg==='ucl')      renderUCL();

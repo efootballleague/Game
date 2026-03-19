@@ -372,11 +372,12 @@ function doLogout() {
 }
 
 // ── OPEN REPORT MODAL ─────────────────────────────────────────
-function openReport(uid, uname) {
+function openReport(uid, uname, matchId) {
   if (!myProfile) { showLanding(); return; }
   if (uid === myProfile.uid) { toast("You can't report yourself.", 'error'); return; }
   $('rep-uid').value   = uid;
   $('rep-uname').value = uname;
+  var midEl = $('rep-mid'); if (midEl) midEl.value = matchId || '';
   $('rep-who').textContent  = uname;
   $('rep-reason').value     = '';
   $('rep-details').value    = '';
@@ -395,6 +396,7 @@ function submitReport() {
   if (!myProfile || !db) { err.textContent = 'You must be logged in.'; return; }
   var btn = $('rep-submit-btn');
   btn.textContent = 'Submitting...'; btn.disabled = true;
+  var mid = $('rep-mid') ? $('rep-mid').value : '';
   db.ref(DB.reports).push({
     reportedUID:  uid,
     reportedName: uname,
@@ -402,6 +404,7 @@ function submitReport() {
     reporterName: myProfile.username,
     reason:       reason,
     details:      detail,
+    matchId:      mid || '',
     status:       'open',
     ts:           Date.now()
   })

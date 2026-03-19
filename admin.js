@@ -234,9 +234,8 @@ function loadAdminMatches() {
       + '<div style="font-size:.62rem;color:var(--dim);margin-bottom:.3rem">'+mdLabel+(m.played?'FT: '+m.hg+'-'+m.ag:(m.matchTime?fmtFull(m.matchTime):'Unscheduled'))+(m.refereeName?' · Ref: '+esc(m.refereeName):'')+(m.postponed?' · <span style="color:#ff6b00">POSTPONED</span>':'')+'</div>'
       + (m.pendingResult&&!m.played?'<div style="font-size:.68rem;color:var(--gold);margin-bottom:.3rem">⏳ Pending review</div>':'')
       + '<div style="display:flex;gap:.3rem;flex-wrap:wrap">'
-      + (!m.played&&m.pendingResult?'<button class="btn-xs" onclick="adminApproveResult(\''+m.id+'\')">Approve</button>':'')
+      + (!m.played?'<button class="btn-xs" onclick="adminApproveResult(\''+m.id+'\')">Approve</button>':'')
       + (!m.played?'<button class="btn-xs" onclick="adminForceResult(\''+m.id+'\')">Force Result</button>':'')
-      + (m.played?'<button class="btn-xs" style="color:var(--gold);border-color:rgba(255,230,0,0.3)" onclick="adminForceResult(\''+m.id+'\')">✏️ Edit Result</button>':'')
       + '<button class="btn-xs" onclick="adminRescheduleMatch(\''+m.id+'\')">Reschedule</button>'
       + (!m.played&&!m.postponed?'<button class="btn-xs" style="color:#ff6b00;border-color:rgba(255,107,0,0.3)" onclick="adminPostponeMatch(\''+m.id+'\')">Postpone</button>':'')
       + (m.postponed?'<button class="btn-xs" onclick="undoPostpone(\''+m.id+'\')">Undo Postpone</button>':'')
@@ -264,32 +263,11 @@ function adminDeleteMatch(mid){
 }
 
 function adminForceResult(mid) {
-  if (!me || me.email !== ADMIN_EMAIL) return;
-  var m = allMatches[mid]; if (!m) return;
-  // Pre-fill with existing score if already played so admin can edit it
-  var hgStr = prompt('Home goals:', m.hg !== undefined ? m.hg : (m.pendingHg || 0));
-  if (hgStr === null) return;
-  var agStr = prompt('Away goals:', m.ag !== undefined ? m.ag : (m.pendingAg || 0));
-  if (agStr === null) return;
-  var hg = parseInt(hgStr), ag = parseInt(agStr);
-  if (isNaN(hg) || isNaN(ag) || hg < 0 || ag < 0) { toast('Invalid scores.', 'error'); return; }
-  db.ref(DB.matches + '/' + mid).update({
-    played:        true,
-    hg:            hg,
-    ag:            ag,
-    playedAt:      m.playedAt || Date.now(),
-    pendingResult: false,
-    awayVerifying: false,
-    awayDispute:   false,
-    refStatus:     'admin_forced',
-    forcedBy:      me.uid,
-    forcedAt:      Date.now()
-  }).then(function() {
-    toast('Result set: ' + hg + '-' + ag);
-    loadAdminMatches();
-    if (typeof notifyBothPlayers === 'function') notifyBothPlayers(mid, 'Admin updated result: ' + hg + '-' + ag + '.');
-    if (typeof checkSeasonEnd === 'function') checkSeasonEnd();
-  }).catch(function() { toast('Failed. Try again.', 'error'); });
+  var hg = prompt('Home goals:','0'); if (hg===null) return;
+  var ag = prompt('Away goals:','0'); if (ag===null) return;
+  hg = parseInt(hg)||0; ag = parseInt(ag)||0;
+  db.ref(DB.matches+'/'+mid).update({played:true,hg:hg,ag:ag,playedAt:Date.now(),pendingResult:false,refStatus:'admin_forced'})
+    .then(function(){ toast('Result forced: '+hg+'-'+ag); loadAdminMatches(); if(typeof checkSeasonEnd==='function')checkSeasonEnd(); });
 }
 
 function adminRescheduleMatch(mid) {
@@ -437,15 +415,18 @@ function renderAdminSeason() {
     +'<button onclick="adminResetAllMatches()" style="background:rgba(255,107,0,0.12);border:1.5px solid #ff6b00;color:#ff6b00;border-radius:8px;padding:.5rem 1rem;font-weight:700;font-size:.75rem;cursor:pointer;font-family:inherit">🔄 Reset All Matches Only</button>'
     +'</div></div>';
 
+  // ── Cup Controls ──
+  html += renderAdminCupControls();
+
   html += '</div>';
   el.innerHTML = html;
 }
 
 // ── Season restart functions ──
 function adminFullReset() {
-  if (!confirm('⚠️ FULL SEASON RESTART\n\nThis will DELETE:\n• All matches\n• All penalties\n• All UCL data\n• All predictions\n\nPlayer accounts and clubs are KEPT.\n\nType YES to confirm.')) return;
-  var conf = prompt('Type RESTART to confirm:','');
-  if (conf !== 'RESTART') { toast('Cancelled.'); return; }
+  if (!confirm('⚠️ FULL SEASON RESTART\n\nThis will permanently DELETE:\n• All matches\n• All penalties\n• All UCL data\n• All predictions\n\nPlayer accounts and clubs are KEPT.\n\nAre you absolutely sure?')) return;
+  var conf = prompt('To confirm, type RESTART exactly:','');
+  if (conf !== 'RESTART') { toast('Cancelled — nothing was deleted.'); return; }
   var updates = {};
   updates[DB.matches]  = null;
   updates[DB.penalties] = null;
@@ -459,13 +440,19 @@ function adminFullReset() {
 }
 
 function adminResetAllMatches() {
-  if (!confirm('Delete ALL matches across all leagues? Cannot be undone.')) return;
-  db.ref(DB.matches).remove().then(function(){ toast('All matches cleared.'); renderAdminSeason(); });
+  if (!confirm('Reset ALL matches across all leagues?\n\nThis CANNOT be undone. All results and fixtures will be deleted.')) return;
+  if (!confirm('Are you 100% sure? Last chance to cancel.')) return;
+  db.ref(DB.matches).remove().then(function(){
+    allMatches = {};
+    toast('All matches cleared.');
+    renderAdminSeason();
+    if(typeof refreshNews==='function') refreshNews();
+  });
 }
 
 function adminLeagueReset(lid) {
   var lg = LGS[lid]||{n:lid};
-  if (!confirm('Reset all matches for '+lg.n+'? Cannot be undone.')) return;
+  if (!confirm('Reset all matches for '+lg.n+'?\n\nAll fixtures and results will be permanently deleted. Cannot be undone.')) return;
   var toDelete = Object.entries(allMatches).filter(function(kv){ return kv[1].league===lid; });
   var updates = {};
   toDelete.forEach(function(kv){ updates[DB.matches+'/'+kv[0]] = null; });
@@ -475,7 +462,7 @@ function adminLeagueReset(lid) {
 
 function adminEndSeason(lid) {
   if (!me||me.email!==ADMIN_EMAIL) return;
-  if (!confirm('End the '+(LGS[lid]||{n:lid}).n+' season? Top 4 will qualify for UCL.')) return;
+  if (!confirm('End the '+(LGS[lid]||{n:lid}).n+' season?\n\nThe top 4 players will qualify for the Champions League.\n\nThis action cannot be undone.')) return;
   db.ref('ef_season_status/'+lid).set({ended:true,endedAt:Date.now(),endedBy:'admin'});
   if (typeof autoQualifyUCL==='function') autoQualifyUCL(lid);
 }
@@ -577,8 +564,17 @@ createPoll = function() {
 function autoScheduleForLeague(lid) {
   if (!me||me.email!==ADMIN_EMAIL||!db) return;
   var players = Object.values(allPlayers).filter(function(p){ return p.league===lid; });
-  if (players.length<2){ toast('Need at least 2 players.','error'); return; }
+  if (players.length<2){ toast('Need at least 2 players in '+(LGS[lid]||{n:lid}).n+'.','error'); return; }
+  if (!confirm('Auto-schedule all fixtures for '+(LGS[lid]||{n:lid}).n+'?\n\nThis will create a full home & away round-robin for '+players.length+' players.')) return;
+  toast('Checking existing fixtures...','info');
+  // Always fetch fresh data from Firebase — never trust stale allMatches after a reset
+  db.ref(DB.matches).orderByChild('league').equalTo(lid).once('value', function(snap) {
+    var freshMatches = snap.val() || {};
+    _doAutoSchedule(lid, players, freshMatches);
+  });
+}
 
+function _doAutoSchedule(lid, players, freshMatches) {
   var ps = players.slice();
   if (ps.length%2!==0) ps.push(null); // bye
   var np = ps.length;
@@ -596,7 +592,7 @@ function autoScheduleForLeague(lid) {
   var allRounds = rounds.concat(rounds.map(function(rnd){ return rnd.map(function(fx){ return {home:fx.away,away:fx.home}; }); }));
 
   var existingKeys={};
-  Object.values(allMatches).forEach(function(m){ if(m.league===lid) existingKeys[m.homeId+'_'+m.awayId]=true; });
+  Object.values(freshMatches).forEach(function(m){ existingKeys[m.homeId+'_'+m.awayId]=true; });
 
   var DAY_MS=24*60*60*1000;
   var startDate=new Date(); startDate.setDate(startDate.getDate()+7); startDate.setHours(18,0,0,0);
@@ -647,10 +643,11 @@ function autoScheduleForLeague(lid) {
       totalNew++;
     });
   });
-  if(!totalNew){ toast('All fixtures already exist.','error'); return; }
+  if(!totalNew){ toast('All fixtures already exist for '+(LGS[lid]||{n:lid}).n+'.','error'); return; }
   db.ref().update(updates).then(function(){
-    toast(totalNew+' fixtures across '+allRounds.length+' match days for '+(LGS[lid]||{}).n+'!');
+    toast('✅ '+totalNew+' fixtures scheduled across '+allRounds.length+' match days for '+(LGS[lid]||{n:lid}).n+'!');
     renderAdminSeason();
+    if(typeof refreshNews==='function') refreshNews();
   }).catch(function(e){ toast('Failed: '+e.message,'error'); });
 }
 
@@ -658,3 +655,117 @@ function autoScheduleForLeague(lid) {
 document.addEventListener('click', function(e) {
   if (e.target&&e.target.id==='admin-broadcast-btn') openMo('broadcast-mo');
 });
+
+// ── CUP AUTO-DRAW ─────────────────────────────────────────────
+// Randomly draws all players from the associated league into
+// a knockout bracket and creates the Round 1 fixtures in Firebase.
+function autoCupDraw(cupId) {
+  if (!me || me.email !== ADMIN_EMAIL || !db) return;
+  var cup = (typeof CUPS !== 'undefined') ? CUPS[cupId] : null;
+  if (!cup) { toast('Cup not found.', 'error'); return; }
+
+  var lid = cup.league;
+  var players = Object.values(allPlayers).filter(function(p){ return p.league === lid; });
+  if (players.length < 2) { toast('Need at least 2 players in ' + cup.n + '.', 'error'); return; }
+
+  // Check if round 1 already drawn
+  var existingCupMs = Object.values(allMatches).filter(function(m){ return m.cupId === cupId && m.cupRound === 1; });
+  if (existingCupMs.length) {
+    if (!confirm('Round 1 of ' + cup.n + ' is already drawn (' + existingCupMs.length + ' fixtures).\n\nDelete existing draw and redraw?')) return;
+    var delUpdates = {};
+    Object.entries(allMatches).forEach(function(kv){
+      if (kv[1].cupId === cupId && kv[1].cupRound === 1) delUpdates[DB.matches+'/'+kv[0]] = null;
+    });
+    db.ref().update(delUpdates);
+  } else {
+    if (!confirm('Draw Round 1 of ' + cup.n + '?\n\n' + players.length + ' players from ' + (LGS[lid]||{}).n + ' will be randomly drawn into pairs.')) return;
+  }
+
+  // Random shuffle then pair up
+  var shuffled = players.slice();
+  for (var i = shuffled.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+  }
+
+  // If odd number, give a bye to last player (they advance automatically)
+  var byePlayer = null;
+  if (shuffled.length % 2 !== 0) byePlayer = shuffled.pop();
+
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  var startDate = new Date(); startDate.setDate(startDate.getDate() + 5); startDate.setHours(18, 0, 0, 0);
+  var startMs = startDate.getTime();
+  var updates = {};
+  var count = 0;
+
+  for (var k = 0; k < shuffled.length; k += 2) {
+    var home = shuffled[k], away = shuffled[k + 1];
+    var matchTime = startMs + Math.floor(count / 2) * DAY_MS + (count % 2) * 3 * 60 * 60 * 1000;
+    var key = db.ref(DB.matches).push().key;
+    updates[DB.matches + '/' + key] = {
+      id:        key,
+      league:    lid,
+      cupId:     cupId,
+      cupName:   cup.n,
+      cupRound:  1,
+      cupRoundName: cup.rounds[0] || 'Round 1',
+      homeId:    home.uid, homeName: home.username, homeClub: home.club,
+      awayId:    away.uid, awayName: away.username, awayClub: away.club,
+      refereeUID: '', refereeName: 'TBD',
+      matchTime: matchTime,
+      played:    false,
+      createdAt: Date.now(),
+      createdBy: 'admin',
+      isCup:     true
+    };
+    count++;
+  }
+
+  if (!Object.keys(updates).length) { toast('Could not create fixtures.', 'error'); return; }
+
+  db.ref().update(updates).then(function() {
+    var msg = '🎱 ' + cup.n + ' Round 1 draw complete! ' + count + ' fixture' + (count > 1 ? 's' : '') + ' created.';
+    if (byePlayer) msg += '\n' + byePlayer.username + ' has a bye to Round 2.';
+    toast(msg);
+    renderAdminSeason();
+    if (typeof refreshNews === 'function') refreshNews();
+  }).catch(function(e) { toast('Draw failed: ' + e.message, 'error'); });
+}
+
+// ── RENDER CUP CONTROLS IN ADMIN SEASON ───────────────────────
+function renderAdminCupControls() {
+  if (typeof CUPS === 'undefined') return '';
+  var html = '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--gold);letter-spacing:1.5px;margin:.9rem 0 .5rem">CUP COMPETITIONS</div>';
+  Object.keys(CUPS).forEach(function(cid) {
+    var cup = CUPS[cid];
+    var lg  = LGS[cup.league] || {};
+    var cupMs = Object.values(allMatches).filter(function(m){ return m.cupId === cid; });
+    var played = cupMs.filter(function(m){ return m.played; }).length;
+    var round1 = cupMs.filter(function(m){ return m.cupRound === 1; }).length;
+    html += '<div style="background:var(--card);border:1px solid rgba(255,230,0,0.15);border-radius:11px;padding:.85rem;margin-bottom:.5rem">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
+      + '<div style="font-weight:700">' + cup.f + ' ' + esc(cup.n) + '</div>'
+      + '<span style="font-size:.62rem;color:var(--dim)">' + lg.short + ' · ' + played + '/' + cupMs.length + ' played</span>'
+      + '</div>'
+      + '<div style="display:flex;gap:.35rem;flex-wrap:wrap">'
+      + '<button class="btn-xs gold" onclick="autoCupDraw(\'' + cid + '\')" >🎱 ' + (round1 ? 'Re-Draw' : 'Draw Round 1') + '</button>'
+      + (round1 ? '<button class="btn-xs" onclick="adminCupReset(\'' + cid + '\')">Reset Cup</button>' : '')
+      + '</div></div>';
+  });
+  return html;
+}
+
+function adminCupReset(cupId) {
+  var cup = (typeof CUPS !== 'undefined') ? CUPS[cupId] : null;
+  if (!cup) return;
+  if (!confirm('Reset all fixtures for ' + cup.n + '?\n\nAll cup results will be permanently deleted.')) return;
+  var toDelete = Object.entries(allMatches).filter(function(kv){ return kv[1].cupId === cupId; });
+  if (!toDelete.length) { toast('No cup fixtures to delete.'); return; }
+  var updates = {};
+  toDelete.forEach(function(kv){ updates[DB.matches + '/' + kv[0]] = null; });
+  db.ref().update(updates).then(function(){
+    toDelete.forEach(function(kv){ delete allMatches[kv[0]]; });
+    toast(cup.n + ' reset.');
+    renderAdminSeason();
+  });
+}
