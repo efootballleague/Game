@@ -478,7 +478,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <button class="drawer-btn" id="drawer-notif-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="notif-badge" class="drawer-badge hidden"><span id="drawer-notif-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" id="drawer-ref-btn" style="display:none" onclick="closeDrawer();goPage('referee')"><span class="drawer-icon">🟢</span> Referee Panel<span id="ref-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('ucl')"><span class="drawer-icon">🏆</span> UCL</button>
-  <button class="drawer-btn" onclick="closeDrawer();openFriendlyModal()" id="drawer-friendly-btn" style="display:none"><span class="drawer-icon">⚔️</span> Friendly Match<span id="friendly-badge" class="drawer-badge hidden"></span></button>
+  <button class="drawer-btn" onclick="closeDrawer();goPage('friendly')" id="drawer-friendly-btn" style="display:none"><span class="drawer-icon">⚔️</span> Friendly Match<span id="friendly-badge" class="drawer-badge hidden"></span><span id="friendly-page-badge" class="drawer-badge hidden"></span></button>
   <div class="drawer-divider"></div>
   <button class="drawer-btn danger" id="drawer-admin-btn" onclick="closeDrawer();goPage('admin')" style="display:none"><span class="drawer-icon">🛡</span> Admin Panel</button>
   <button class="drawer-btn danger" id="drawer-signout-btn" onclick="closeDrawer();doLogout()" style="display:none"><span class="drawer-icon">🚪</span> Sign Out</button>
@@ -560,7 +560,7 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div id="friendly-section"></div>
     <div id="my-swap-section"></div>
     <div id="prep-15min-notice"></div>
-    <div class="page-header"><div class="section-title c-gold">Match Prep</div><div style="display:flex;gap:.4rem"><button class="btn-sm btn-outline" onclick="openFriendlyModal()" id="challenge-btn" style="display:none">⚔️ Challenge</button><button class="btn-sm btn-outline" onclick="autoScheduleLeague()">Auto-Schedule</button></div></div>
+    <div class="page-header"><div class="section-title c-gold">Match Prep</div><div style="display:flex;gap:.4rem"><button class="btn-sm btn-outline" onclick="goPage('friendly')" id="challenge-btn" style="display:none">⚔️ Friendly</button><button class="btn-sm btn-outline" onclick="autoScheduleLeague()">Auto-Schedule</button></div></div>
     <div class="section-header"><div class="section-title c-cyan" style="font-size:.68rem">MATCH ROOMS</div><div class="section-line"></div></div>
     <div id="match-rooms-wrap"><div id="match-rooms-list"><div class="card empty">Loading...</div></div><div id="match-room-panel" class="hidden"></div></div>
     <div class="section-header"><div class="section-title c-green" style="font-size:.65rem">UPCOMING SCHEDULED</div></div>
@@ -572,20 +572,22 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
   <!-- PREDICTIONS -->
   <div class="page" id="page-predict"></div>
+  <!-- FRIENDLY -->
+  <div class="page" id="page-friendly"></div>
   <!-- UCL -->
   <div class="page" id="page-ucl"><div class="card empty" style="margin-top:1rem">UCL coming in Batch 3</div></div>
   <!-- REFEREE -->
   <div class="page" id="page-referee"></div>
   <!-- LEADERBOARD -->
-  <div class="page" id="page-leaderboard"><div id="my-predictions"></div><div id="pred-leaderboard"></div><div class="card empty" style="margin-top:1rem">Leaderboard coming in Batch 2</div></div>
+  <div class="page" id="page-leaderboard"><div id="my-predictions"></div><div id="pred-leaderboard"></div></div>
   <!-- POLLS -->
-  <div class="page" id="page-polls"><div class="card empty" style="margin-top:1rem">Polls coming in Batch 2</div></div>
+  <div class="page" id="page-polls"></div>
   <!-- CHAT / MESSENGER -->
   <div class="page" id="page-chat"></div>
   <!-- DMs (legacy, now part of messenger) -->
   <div class="page" id="page-pm"></div>
   <!-- PROFILE -->
-  <div class="page" id="page-profile"><div id="profile-content"><div class="card empty" style="margin-top:1rem">Profile coming in Batch 2</div></div></div>
+  <div class="page" id="page-profile"><div id="profile-content"></div></div>
   <!-- NOTIFICATIONS -->
   <div class="page" id="page-notifications"></div>
   <!-- ADMIN -->

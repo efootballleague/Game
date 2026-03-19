@@ -691,27 +691,54 @@ function renderNotifications() {
     el.innerHTML = list.map(function(n) {
       var d = n.data;
       var isCode = (d.type === 'room_code' || d.type === 'match_code');
+      var isFriendly = d.type === 'friendly';
       var iconMap = { match:'⚽', result:'📊', referee:'🟢', dispute:'⚠️',
                       ucl:'🏆', poll:'📊', system:'📢', warning:'⚠️',
-                      room_code:'🏟️', match_code:'🏟️', deduction:'📉' };
-      var icon = isCode ? '🏟️' : (iconMap[d.type] || d.icon || '🔔');
-      var borderColor = isCode ? 'rgba(0,255,133,0.45)' : (d.read ? 'var(--border)' : 'rgba(0,212,255,0.25)');
-      var bg = isCode ? 'rgba(0,255,133,0.05)' : 'var(--card)';
-      var titleColor = isCode ? 'var(--green)' : (d.read ? 'var(--text)' : 'var(--cyan)');
+                      room_code:'🏟️', match_code:'🏟️', deduction:'📉', friendly:'⚔️' };
+      var icon = isCode ? '🏟️' : isFriendly ? '⚔️' : (iconMap[d.type] || d.icon || '🔔');
+      var borderColor = isCode ? 'rgba(0,255,133,0.45)' : isFriendly ? 'rgba(0,212,255,0.3)' : (d.read ? 'var(--border)' : 'rgba(0,212,255,0.25)');
+      var bg = isCode ? 'rgba(0,255,133,0.05)' : isFriendly ? 'rgba(0,212,255,0.04)' : 'var(--card)';
+      var titleColor = isCode ? 'var(--green)' : isFriendly ? 'var(--cyan)' : (d.read ? 'var(--text)' : 'var(--cyan)');
+
+      // Where does tapping this notification go?
+      var tapAction = '';
+      if (isCode && d.matchId) {
+        tapAction = 'goPage(\'matchprep\')';
+      } else if (isCode) {
+        tapAction = 'goPage(\'matchprep\')';
+      } else if (isFriendly) {
+        tapAction = 'goPage(\'friendly\')';
+      } else if (d.type === 'result' || d.type === 'referee' || d.type === 'dispute') {
+        tapAction = 'goPage(\'matchprep\')';
+      } else if (d.type === 'match') {
+        tapAction = 'goPage(\'matchprep\')';
+      } else if (d.type === 'poll') {
+        tapAction = 'goPage(\'polls\')';
+      } else if (d.type === 'ucl') {
+        tapAction = 'goPage(\'ucl\')';
+      } else if (d.type === 'deduction') {
+        tapAction = 'goPage(\'leagues\')';
+      }
+
       var codeBlock = '';
       if (isCode && d.code) {
         codeBlock = '<div style="margin-top:.5rem;background:rgba(0,0,0,0.35);border-radius:8px;padding:.45rem .75rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem">'
           + '<span style="font-family:Orbitron,sans-serif;font-size:.95rem;font-weight:900;color:var(--green);letter-spacing:3px">' + esc(d.code) + '</span>'
-          + '<button onclick="copyCode(\'' + esc(d.code) + '\')" class="btn-xs" style="color:var(--green);border-color:rgba(0,255,133,0.3);font-size:.6rem">Copy</button>'
+          + '<button onclick="event.stopPropagation();copyCode(\'' + esc(d.code) + '\')" class="btn-xs" style="color:var(--green);border-color:rgba(0,255,133,0.3);font-size:.6rem">Copy</button>'
           + '</div>';
       }
-      return '<div style="display:flex;align-items:flex-start;gap:.7rem;padding:.75rem .9rem;background:' + bg + ';'
-        + 'border:1px solid ' + borderColor + ';border-radius:11px;margin-bottom:.45rem;' + (d.read && !isCode ? 'opacity:.65' : '') + '">'
+
+      var tapHint = tapAction ? '<div style="font-size:.58rem;color:var(--cyan);margin-top:3px">Tap to view →</div>' : '';
+
+      return '<div onclick="' + (tapAction ? tapAction : '') + '" style="display:flex;align-items:flex-start;gap:.7rem;padding:.75rem .9rem;background:' + bg + ';'
+        + 'border:1px solid ' + borderColor + ';border-radius:11px;margin-bottom:.45rem;' + (d.read && !isCode && !isFriendly ? 'opacity:.65' : '') + ';'
+        + (tapAction ? 'cursor:pointer;' : '') + '">'
         + '<div style="font-size:1.25rem;flex-shrink:0;margin-top:2px">' + icon + '</div>'
         + '<div style="flex:1;min-width:0">'
         + '<div style="font-weight:700;font-size:.82rem;color:' + titleColor + '">' + esc(d.title||'') + '</div>'
         + '<div style="font-size:.74rem;color:var(--dim);margin-top:2px">' + esc(d.body||'') + '</div>'
         + codeBlock
+        + tapHint
         + '<div style="font-size:.6rem;color:var(--dim);margin-top:4px">' + fmtAgo(d.ts) + '</div>'
         + '</div>'
         + (!d.read ? '<div style="width:9px;height:9px;border-radius:50%;background:' + (isCode ? 'var(--green)' : 'var(--cyan)') + ';flex-shrink:0;margin-top:4px;box-shadow:0 0 6px ' + (isCode ? 'rgba(0,255,133,.5)' : 'rgba(0,212,255,.4)') + '"></div>' : '')

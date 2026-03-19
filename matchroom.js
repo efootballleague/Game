@@ -120,7 +120,8 @@ function buildRoomCard(m, uid, isAdmin) {
     : 'var(--border)';
 
   var midVal = m.id || m.key || '';
-  var isOpen = _openRoomId === midVal;
+  // Auto-expand if there's a room code, pending action, or unsettled result
+  var isOpen = _openRoomId === midVal || !!m.roomCode || hasVerify || hasDispute || hasPending;
 
   // ── HEADER (always visible, click to expand) ──
   var html = '<div class="mcard" data-mid="' + midVal + '" style="border-color:' + borderColor + ';margin-bottom:.5rem">'
@@ -148,13 +149,11 @@ function buildRoomCard(m, uid, isAdmin) {
   // Room code section (home team sets, away team copies)
   if (!isPlayed && !hasPending) {
     if (m.roomCode) {
-      html += '<div style="background:rgba(0,255,133,0.06);border:1px solid rgba(0,255,133,0.2);border-radius:10px;padding:.6rem .8rem;margin-bottom:.5rem">'
-        + '<div style="font-size:.6rem;color:var(--dim);margin-bottom:.3rem">ROOM CODE</div>'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem">'
-        + '<span style="font-family:Orbitron,sans-serif;font-weight:900;font-size:1rem;color:var(--green);letter-spacing:3px">' + esc(m.roomCode) + '</span>'
-        + '<button class="btn-xs" style="color:var(--green);border-color:rgba(0,255,133,0.3)" onclick="copyCode(\'' + esc(m.roomCode) + '\')">Copy</button>'
-        + '</div>'
-        + (m.note ? '<div style="font-size:.65rem;color:var(--dim);margin-top:.3rem">' + esc(m.note) + '</div>' : '')
+      html += '<div style="background:rgba(0,255,133,0.08);border:2px solid rgba(0,255,133,0.4);border-radius:12px;padding:.8rem 1rem;margin-bottom:.5rem;text-align:center">'
+        + '<div style="font-size:.6rem;color:var(--dim);letter-spacing:2px;margin-bottom:.4rem">🏟️ ROOM CODE</div>'
+        + '<div style="font-family:Orbitron,sans-serif;font-weight:900;font-size:1.6rem;color:var(--green);letter-spacing:6px;margin-bottom:.5rem">' + esc(m.roomCode) + '</div>'
+        + '<button style="background:rgba(0,255,133,0.15);border:1.5px solid rgba(0,255,133,0.4);color:var(--green);border-radius:8px;padding:.4rem 1.2rem;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit" onclick="copyCode(\'' + esc(m.roomCode) + '\')">📋 Copy Code</button>'
+        + (m.note ? '<div style="font-size:.65rem;color:var(--dim);margin-top:.4rem">' + esc(m.note) + '</div>' : '')
         + '</div>';
     } else if (isHome) {
       html += '<div style="background:rgba(255,230,0,0.05);border:1px solid rgba(255,230,0,0.2);border-radius:10px;padding:.6rem .8rem;margin-bottom:.5rem;font-size:.72rem;color:var(--gold)">⚠️ Drop your room code so the away team can join.</div>';
@@ -523,7 +522,7 @@ var submitPrep = function() {
       closeMo('prep-mo'); toast('Room code sent!');
       if (btn) { btn.textContent='Send to Away Team'; btn.disabled=false; }
       renderMatchRooms(); renderMatchPrep();
-      sendNotif(m.awayId, { title:'🏟️ Room Code Ready!', body:myProfile.username+' dropped the code: '+code, type:'room_code', code:code });
+      sendNotif(m.awayId, { title:'🏟️ Room Code Ready!', body:myProfile.username+' dropped the code: '+code, type:'room_code', code:code, matchId:mid });
       if (typeof showAttentionDot==='function') showAttentionDot();
     }).catch(function(){ err.textContent='Failed.'; if(btn){btn.textContent='Send to Away Team';btn.disabled=false;} });
 };

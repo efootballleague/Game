@@ -113,7 +113,7 @@ function notifyAwayTeam(awayUID, awayPlayer, mid, m, hg, ag, ssUrl) {
   sendNotif(awayUID, {
     title:'⚠️ Verify Match Result',
     body: (hp?hp.username:'Home')+' submitted '+hg+'-'+ag+'. You have 48h to verify or dispute.',
-    type:'result', icon:'result'
+    type:'result', icon:'result', matchId:mid
   });
 }
 
@@ -123,7 +123,7 @@ function notifyReferee(refUID, refName, mid, m, hg, ag, ssUrl) {
   sendNotif(refUID, {
     title:'Match result to review',
     body:(hp?hp.username:'?')+' vs '+(ap?ap.username:'?')+' — '+hg+'-'+ag,
-    type:'referee', icon:'referee'
+    type:'referee', icon:'referee', matchId:mid
   });
 }
 
@@ -168,7 +168,7 @@ function submitDispute() {
       toast('Dispute submitted. Referee will decide.');
       btn.textContent='❌ Submit Dispute'; btn.disabled=false;
       var m=allMatches[mid];
-      if (m&&m.refereeUID) sendNotif(m.refereeUID,{title:'⚠️ Match Disputed',body:'Away team disputed. Your review needed.',type:'dispute',icon:'alert'});
+      if (m&&m.refereeUID) sendNotif(m.refereeUID,{title:'⚠️ Match Disputed',body:'Away team disputed. Your review needed.',type:'dispute',icon:'alert',matchId:mid});
       renderRefPanel();
       renderMatchRooms();
     }).catch(function(){ err.textContent='Failed.'; btn.textContent='❌ Submit Dispute'; btn.disabled=false; });
@@ -297,7 +297,7 @@ function awayConfirm(mid) {
   if (!myProfile||!db) return;
   db.ref(DB.matches+'/'+mid).update({ awayVerifying:false, refStatus:'away_confirmed' })
     .then(function(){ toast('Result confirmed!'); renderRefPanel(); renderMatchRooms();
-      var m=allMatches[mid]; if(m&&m.refereeUID) sendNotif(m.refereeUID,{title:'Result confirmed',body:'Away team confirmed the result.',type:'referee'});
+      var m=allMatches[mid]; if(m&&m.refereeUID) sendNotif(m.refereeUID,{title:'Result confirmed',body:'Away team confirmed the result.',type:'referee',matchId:mid});
     });
 }
 
@@ -337,8 +337,8 @@ function refereeReverse(mid) {
 
 function notifyBothPlayers(mid, msg) {
   var m=allMatches[mid]; if(!m||!db) return;
-  sendNotif(m.homeId,{title:'Match Update',body:msg,icon:'result',type:'result'});
-  sendNotif(m.awayId,{title:'Match Update',body:msg,icon:'result',type:'result'});
+  sendNotif(m.homeId,{title:'Match Update',body:msg,icon:'result',type:'result',matchId:mid});
+  sendNotif(m.awayId,{title:'Match Update',body:msg,icon:'result',type:'result',matchId:mid});
 }
 
 // ── AUTO-APPROVE CHECKER — called on matches load ────────────

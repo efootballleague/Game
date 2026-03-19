@@ -26,7 +26,9 @@ function initFriendly() {
     });
     var count = Object.values(_friendlyRequests).filter(function(r){ return r.status === 'pending'; }).length;
     setBadge('friendly-badge', count);
+    setBadge('friendly-page-badge', count);
     if (activePage() === 'matchprep') renderFriendlySection();
+    if (activePage() === 'friendly')  renderFriendlyPage();
   });
 
   // Requests I sent
@@ -39,6 +41,7 @@ function initFriendly() {
       }
     });
     if (activePage() === 'matchprep') renderFriendlySection();
+    if (activePage() === 'friendly')  renderFriendlyPage();
   });
 }
 
@@ -141,7 +144,8 @@ function sendFriendlyRequest() {
       title: '⚔️ Friendly Challenge!',
       body:  myProfile.username + ' has challenged you to a friendly match!',
       icon:  '⚔️',
-      type:  'friendly'
+      type:  'friendly',
+      link:  'friendly'
     });
   }).catch(function(e) {
     err.textContent = 'Failed: ' + e.message;
@@ -188,7 +192,8 @@ function acceptFriendly(key) {
       title: '✅ Challenge Accepted!',
       body:  req.toName + ' accepted your friendly challenge!',
       icon:  '✅',
-      type:  'friendly'
+      type:  'friendly',
+      link:  'friendly'
     });
     renderFriendlySection();
   }).catch(function(e){ toast('Failed: ' + e.message, 'error'); });
@@ -204,7 +209,8 @@ function declineFriendly(key) {
         title: '❌ Challenge Declined',
         body:  req.toName + ' declined your friendly match challenge.',
         icon:  '❌',
-        type:  'friendly'
+        type:  'friendly',
+        link:  'friendly'
       });
       renderFriendlySection();
     });
@@ -269,4 +275,98 @@ function renderFriendlySection() {
 
   html += '</div>';
   el.innerHTML = html;
+}
+
+// ── FULL FRIENDLY PAGE ────────────────────────────────────────
+function renderFriendlyPage() {
+  var pg = $('page-friendly'); if (!pg) return;
+
+  if (!myProfile) {
+    pg.innerHTML = '<div class="card empty" style="margin-top:1.5rem">Login to view friendly matches.</div>';
+    return;
+  }
+
+  var incoming = Object.values(_friendlyRequests).filter(function(r){ return r.status === 'pending'; });
+  var accepted = Object.values(_friendlyRequests).filter(function(r){ return r.status === 'accepted'; });
+  var sent     = Object.values(_friendlySent).filter(function(r){ return r.status === 'pending'; });
+
+  var html = '<div class="section-header">'
+    + '<div class="section-title c-cyan">⚔️ Friendly Matches</div>'
+    + '<div class="section-line"></div>'
+    + '<button class="btn-xs" onclick="openFriendlyModal()">+ Challenge</button>'
+    + '</div>';
+
+  // ── INCOMING REQUESTS ──────────────────────────────────────
+  if (incoming.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--gold);letter-spacing:1.5px;margin:.8rem 0 .4rem">📬 CHALLENGES RECEIVED ('+incoming.length+')</div>';
+    incoming.forEach(function(r) {
+      var p = allPlayers[r.fromUID];
+      html += '<div class="card" style="padding:.9rem;margin-bottom:.5rem;border-color:rgba(255,230,0,0.25)">'
+        + '<div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.6rem">'
+        + clubBadge(r.fromClub, r.fromLeague, 36)
+        + '<div style="flex:1">'
+        + '<div style="font-weight:700;font-size:.88rem">'+esc(r.fromName)+'</div>'
+        + '<div style="font-size:.65rem;color:var(--dim)">'+esc(r.fromClub)+' · '+esc((LGS[r.fromLeague]||{}).short||'')+'</div>'
+        + (r.message ? '<div style="font-size:.72rem;color:var(--text);font-style:italic;margin-top:.3rem">"'+esc(r.message)+'"</div>' : '')
+        + (r.proposedTime ? '<div style="font-size:.65rem;color:var(--gold);margin-top:.25rem">📅 Proposed: '+fmtFull(r.proposedTime)+'</div>' : '')
+        + '<div style="font-size:.6rem;color:var(--dim);margin-top:.2rem">Sent '+fmtAgo(r.createdAt)+'</div>'
+        + '</div></div>'
+        + '<div style="display:flex;gap:.5rem">'
+        + '<button class="btn-primary" style="flex:1;padding:.5rem;font-size:.75rem" onclick="acceptFriendly(\''+r.key+'\')">✓ Accept Challenge</button>'
+        + '<button class="btn-secondary" style="padding:.5rem .9rem;font-size:.75rem" onclick="declineFriendly(\''+r.key+'\')">✗ Decline</button>'
+        + '</div></div>';
+    });
+  }
+
+  // ── ACTIVE / ACCEPTED ──────────────────────────────────────
+  if (accepted.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--green);letter-spacing:1.5px;margin:.8rem 0 .4rem">✅ ACTIVE FRIENDLIES</div>';
+    accepted.forEach(function(r) {
+      var isHome = r.fromUID === myProfile.uid;
+      var oppName = isHome ? r.toName : r.fromName;
+      var oppClub = isHome ? r.toClub : r.fromClub;
+      var oppLeague = isHome ? r.toLeague : r.fromLeague;
+      var m = r.matchId ? allMatches[r.matchId] : null;
+      html += '<div class="card" style="padding:.9rem;margin-bottom:.5rem;border-color:rgba(0,255,133,0.2)">'
+        + '<div style="display:flex;align-items:center;gap:.65rem">'
+        + clubBadge(oppClub, oppLeague, 32)
+        + '<div style="flex:1">'
+        + '<div style="font-weight:700;font-size:.84rem">vs '+esc(oppName)+'</div>'
+        + '<div style="font-size:.65rem;color:var(--dim)">'+esc(oppClub)+'</div>'
+        + (m && m.matchTime ? '<div style="font-size:.65rem;color:var(--cyan);margin-top:.25rem">📅 '+fmtFull(m.matchTime)+'</div>' : '<div style="font-size:.65rem;color:var(--dim);margin-top:.25rem">Time TBD — set in Match Prep</div>')
+        + '</div>'
+        + '<span style="font-size:.62rem;font-weight:700;color:var(--green);background:rgba(0,255,133,0.08);border:1px solid rgba(0,255,133,0.25);border-radius:6px;padding:3px 8px">Match Created</span>'
+        + '</div></div>';
+    });
+  }
+
+  // ── SENT REQUESTS ──────────────────────────────────────────
+  if (sent.length) {
+    html += '<div style="font-family:Orbitron,sans-serif;font-size:.6rem;color:var(--cyan);letter-spacing:1.5px;margin:.8rem 0 .4rem">📤 CHALLENGES SENT</div>';
+    sent.forEach(function(r) {
+      html += '<div class="card" style="padding:.9rem;margin-bottom:.5rem">'
+        + '<div style="display:flex;align-items:center;gap:.65rem">'
+        + clubBadge(r.toClub, r.toLeague, 32)
+        + '<div style="flex:1">'
+        + '<div style="font-weight:700;font-size:.84rem">'+esc(r.toName)+'</div>'
+        + '<div style="font-size:.65rem;color:var(--dim)">'+esc(r.toClub)+'</div>'
+        + (r.message ? '<div style="font-size:.7rem;font-style:italic;color:var(--dim);margin-top:.2rem">"'+esc(r.message)+'"</div>' : '')
+        + '<div style="font-size:.6rem;color:var(--gold);margin-top:.25rem">⏳ Waiting for response...</div>'
+        + '</div>'
+        + '<button class="btn-xs" onclick="cancelFriendly(\''+r.key+'\')" style="color:var(--pink);border-color:rgba(255,40,130,0.3);flex-shrink:0">Cancel</button>'
+        + '</div></div>';
+    });
+  }
+
+  // ── EMPTY STATE ────────────────────────────────────────────
+  if (!incoming.length && !accepted.length && !sent.length) {
+    html += '<div class="card empty" style="margin-top:.5rem">'
+      + '<div style="font-size:1.8rem;margin-bottom:.5rem">⚔️</div>'
+      + '<div style="font-size:.84rem;font-weight:700;margin-bottom:.3rem">No friendly matches yet</div>'
+      + '<div style="font-size:.72rem;color:var(--dim);margin-bottom:1rem">Challenge any player to a friendly — cross-league, no points, pure bragging rights.</div>'
+      + '<button class="btn-primary" style="width:auto;padding:.55rem 1.5rem;font-size:.78rem" onclick="openFriendlyModal()">⚔️ Challenge a Player</button>'
+      + '</div>';
+  }
+
+  pg.innerHTML = html;
 }
