@@ -475,7 +475,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <button class="drawer-btn" onclick="closeDrawer();goPage('leaderboard')"><span class="drawer-icon">📈</span> Leaderboard</button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('polls')"><span class="drawer-icon">📊</span> Polls<span id="polls-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();openMessenger('dms')"><span class="drawer-icon">💬</span> Messages<span id="pm-badge" class="drawer-badge hidden"></span></button>
-  <button class="drawer-btn" id="drawer-notif-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="notif-badge" class="drawer-badge hidden"></span></button>
+  <button class="drawer-btn" id="drawer-notif-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="notif-badge" class="drawer-badge hidden"><span id="drawer-notif-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" id="drawer-ref-btn" style="display:none" onclick="closeDrawer();goPage('referee')"><span class="drawer-icon">🟢</span> Referee Panel<span id="ref-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('ucl')"><span class="drawer-icon">🏆</span> UCL</button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('friendly')" id="drawer-friendly-btn" style="display:none"><span class="drawer-icon">⚔️</span> Friendly Match<span id="friendly-badge" class="drawer-badge hidden"></span><span id="friendly-page-badge" class="drawer-badge hidden"></span></button>
@@ -733,13 +733,49 @@ select.inp option{background:#0e0018;color:var(--text)}
 <script src="friendly.js"></script>
 <script src="news.js"></script>
 <script>
-  try {
-    initApp();
+  // Extend goPage to handle pages not in core.js routing
+  var _coreGoPage = goPage;
+  goPage = function(name) {
+    _coreGoPage(name);
+    // These pages are NOT handled in core.js goPage so add them here
+    if (name === 'chat')          renderMessenger();
+    if (name === 'predict')       renderPredictions();
+    if (name === 'notifications') renderNotifications();
+    // referee and profile ARE already handled in core.js — don't call again
+    // Show/hide chat FAB
+    var fab = document.getElementById('chat-fab');
+    if (fab) fab.style.display = (name === 'chat') ? 'none' : (myProfile ? 'flex' : 'none');
+  };
+
+  // Update topbar when logged in — show club badge instead of Login/Join
+  var _coreUpdateNav = updateNav;
+  updateNav = function() {
+    _coreUpdateNav();
+    var e = document.getElementById('nav-right');
+    if (!e) return;
+    if (myProfile && myProfile.username) {
+      var club = getClub(myProfile.league, myProfile.club);
+      var init = myProfile.username.charAt(0).toUpperCase();
+      e.innerHTML = '<button class="topbar-club-btn" onclick="goPage(\'profile\')" title="' + esc(myProfile.username) + '">'
+        + (club && club.logo ? '<img src="' + club.logo + '" onerror="this.outerHTML=\'' + init + '\'">' : init)
+        + '</button>';
+      // Show FAB when logged in
+      var fab = document.getElementById('chat-fab');
+      if (fab && activePage() !== 'chat') fab.style.display = 'flex';
+    }
+  };
+
+  // renderHomeStats is defined in pages.js — no stub needed here
+
+  try { 
+    initApp(); 
+    // Hook into auth to start extra listeners
+    var _origStartListeners = startListeners;
   } catch(e) {
-    console.error('Init error:', e);
+    console.error('Init error:',e);
     hideLoader();
-    var h = document.getElementById('page-home');
-    if (h) h.classList.add('active');
+    var h=document.getElementById('page-home');
+    if(h)h.classList.add('active');
   }
 </script>
 
