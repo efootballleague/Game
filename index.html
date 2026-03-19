@@ -9,16 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ── RESET & ROOT ─────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0010;--card:#110820;--cyan:#00D4FF;--green:#00FF85;
-  --gold:#FFE600;--pink:#FF2882;--dim:#666;--text:#e8e8f0;
-  --border:rgba(255,255,255,0.07);--safe-bottom:env(safe-area-inset-bottom,0px)
-}
+:root{--bg:#0a0010;--card:#110820;--cyan:#00D4FF;--green:#00FF85;--gold:#FFE600;--pink:#FF2882;--dim:#666;--text:#e8e8f0;--border:rgba(255,255,255,0.07);--safe-bottom:env(safe-area-inset-bottom,0px)}
 body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden}
-
-/* ── LOADER ───────────────────────────────────────────────── */
+/* LOADER */
 #loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;transition:opacity .4s}
 .loader-logo{width:72px;height:72px;border-radius:50%;border:2px solid rgba(0,212,255,0.3);animation:lpulse 1.4s ease-in-out infinite;display:flex;align-items:center;justify-content:center;font-size:2rem}
 .loader-bar{width:140px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
@@ -26,11 +20,9 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-
 .loader-text{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--dim);letter-spacing:3px}
 @keyframes lpulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,255,.4)}50%{box-shadow:0 0 0 14px rgba(0,212,255,0)}}
 @keyframes lslide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
-
-/* ── LANDING ──────────────────────────────────────────────── */
+/* LANDING */
 #landing{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow-y:auto}
-#landing.landing-hidden{display:none!important}
-#landing.landing-visible{display:flex}
+#landing.landing-hidden{display:none!important}#landing.landing-visible{display:flex}
 .landing-inner{width:100%;max-width:400px;padding:2rem 1.5rem 5rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
 .landing-logo{width:72px;height:72px;border-radius:50%;border:2px solid rgba(0,212,255,0.3)}
 .landing-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.6rem;color:var(--cyan)}
@@ -39,8 +31,7 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-
 .landing-tabs{display:flex;gap:.5rem;width:100%;margin-top:.5rem}
 .ltab{flex:1;padding:.55rem 1.2rem;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--dim);font-family:'Exo 2',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s}
 .ltab.active{background:rgba(0,212,255,0.12);border-color:var(--cyan);color:var(--cyan)}
-.lpanel{display:none;width:100%;flex-direction:column;gap:.75rem}
-.lpanel.active{display:flex}
+.lpanel{display:none;width:100%;flex-direction:column;gap:.75rem}.lpanel.active{display:flex}
 .lbl{font-size:.72rem;color:var(--dim);font-weight:600;display:block;margin-bottom:4px}
 .inp{width:100%;padding:.65rem .85rem;border-radius:10px;background:rgba(255,255,255,0.05);border:1.5px solid var(--border);color:var(--text);font-family:'Exo 2',sans-serif;font-size:.88rem;outline:none;transition:.2s}
 .inp:focus{border-color:var(--cyan);background:rgba(0,212,255,0.06)}
@@ -63,10 +54,8 @@ select.inp option{background:#0e0018;color:var(--text)}
 .club-opt-name{font-size:.7rem;font-weight:700;margin-top:.3rem}
 .club-opt-status{font-size:.6rem;color:var(--green);margin-top:2px}
 .club-opt.taken .club-opt-status{color:var(--pink)}
-.club-confirm-inner{text-align:center;padding:1rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:12px}
 .hidden{display:none!important}
-
-/* ── TOPBAR ───────────────────────────────────────────────── */
+/* TOPBAR */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:200;height:54px;padding:0 1rem;background:rgba(10,0,16,0.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:box-shadow .2s}
 #topbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.6)}
 #hamburger{width:38px;height:38px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:6px;flex-shrink:0}
@@ -83,68 +72,53 @@ select.inp option{background:#0e0018;color:var(--text)}
 .btn-outline:hover{border-color:var(--cyan);color:var(--cyan)}
 .btn-accent{background:linear-gradient(135deg,#00FF85,#00cc6a);color:#000}
 .topbar-club-btn{width:34px;height:34px;border-radius:50%;border:2px solid rgba(0,212,255,0.35);background:rgba(0,212,255,0.08);cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--cyan);transition:.2s;padding:2px}
-.topbar-club-btn:hover{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,.3)}
+.topbar-club-btn:hover{border-color:var(--cyan)}
 .topbar-club-btn img{width:100%;height:100%;object-fit:contain}
-.uchip{font-size:.76rem;font-weight:700;color:var(--cyan);cursor:pointer;padding:.3rem .6rem;border-radius:8px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);transition:.15s}
-.uchip:hover{background:rgba(0,212,255,0.15)}
-
-/* ── CHAT FAB ────────────────────────────────────────────── */
-#chat-fab{position:fixed;top:64px;right:12px;z-index:190;width:44px;height:44px;border-radius:50%;background:rgba(10,0,16,0.92);border:1.5px solid rgba(0,212,255,0.35);display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 14px rgba(0,0,0,.5);transition:box-shadow .2s}
+/* CHAT FAB */
+#chat-fab{position:fixed;top:64px;right:12px;z-index:190;width:44px;height:44px;border-radius:50%;background:rgba(10,0,16,0.92);border:1.5px solid rgba(0,212,255,0.35);display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 14px rgba(0,0,0,.5);transition:box-shadow .2s;touch-action:none;user-select:none}
 #chat-fab:hover{box-shadow:0 0 16px rgba(0,212,255,.3)}
 #chat-fab svg{width:22px;height:22px;stroke:var(--cyan);fill:none;stroke-width:1.8}
 #fab-badge{position:absolute;top:-5px;right:-5px;background:var(--pink);color:#fff;font-size:.58rem;font-weight:700;border-radius:10px;padding:1px 6px;min-width:18px;text-align:center;display:none;align-items:center;justify-content:center;border:2px solid var(--bg)}
-
-/* ── DRAWER ───────────────────────────────────────────────── */
+/* DRAWER */
 #drawer-overlay{position:fixed;inset:0;z-index:299;background:rgba(0,0,0,.65);display:none}
 #drawer-overlay.active{display:block}
 #drawer{position:fixed;top:0;left:0;bottom:0;z-index:300;width:270px;background:#12001f;border-right:1px solid rgba(0,212,255,0.2);transform:translateX(-100%);transition:transform .28s ease;display:flex;flex-direction:column;padding-top:54px;overflow-y:auto;box-shadow:4px 0 30px rgba(0,0,0,0.8)}
 #drawer.open{transform:translateX(0)}
 .drawer-profile{padding:1.2rem 1rem .9rem;display:flex;align-items:center;gap:.8rem}
 .drawer-avatar{width:44px;height:44px;border-radius:50%;background:rgba(0,212,255,0.12);border:1.5px solid rgba(0,212,255,0.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--cyan);overflow:hidden;flex-shrink:0}
-.drawer-name{font-weight:700;font-size:.9rem}
-.drawer-club-lg{font-size:.68rem;color:var(--dim);margin-top:2px}
+.drawer-name{font-weight:700;font-size:.9rem}.drawer-club-lg{font-size:.68rem;color:var(--dim);margin-top:2px}
 .drawer-divider{height:1px;background:var(--border);margin:.3rem 0}
 .drawer-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.8rem 1rem;background:none;border:none;color:var(--text);font-size:.84rem;font-family:'Exo 2',sans-serif;font-weight:600;cursor:pointer;text-align:left;transition:.15s}
 .drawer-btn:hover{background:rgba(255,255,255,0.05);color:var(--cyan)}
-.drawer-btn.danger{color:var(--pink)}
-.drawer-btn.danger:hover{background:rgba(255,40,130,0.08)}
+.drawer-btn.danger{color:var(--pink)}.drawer-btn.danger:hover{background:rgba(255,40,130,0.08)}
 .drawer-icon{font-size:1.05rem;width:22px;text-align:center}
 .drawer-badge{margin-left:auto;background:var(--pink);color:#fff;font-size:.6rem;font-weight:700;border-radius:9px;padding:1px 6px;min-width:18px;text-align:center}
-
-/* ── APP LAYOUT ───────────────────────────────────────────── */
+/* APP */
 #app{padding-top:54px;padding-bottom:calc(62px + var(--safe-bottom));min-height:100vh}
-.page{display:none;padding:.75rem .8rem 1rem}
-.page.active{display:block}
-
-/* ── BOTTOM NAV ───────────────────────────────────────────── */
+.page{display:none;padding:.75rem .8rem 1rem}.page.active{display:block}
+/* BOTTOM NAV */
 #botnav{position:fixed;bottom:0;left:0;right:0;z-index:150;height:calc(60px + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:rgba(10,0,16,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;align-items:center}
 .nb{flex:1;height:100%;background:none;border:none;color:var(--dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-size:.56rem;font-family:'Exo 2',sans-serif;font-weight:600;transition:.15s;position:relative;padding-bottom:2px}
 .nb svg{width:19px;height:19px;stroke:currentColor;fill:none;transition:.15s}
-.nb.active{color:var(--cyan)}
-.nb.active svg{filter:drop-shadow(0 0 4px rgba(0,212,255,.5))}
+.nb.active{color:var(--cyan)}.nb.active svg{filter:drop-shadow(0 0 4px rgba(0,212,255,.5))}
 .nb-center-ring{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#00D4FF,#00FF85);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(0,212,255,.35)}
 .nb-center-ring svg{stroke:#000;width:22px;height:22px}
 .nb-badge{position:absolute;top:5px;right:calc(50% - 18px);background:var(--pink);color:#fff;font-size:.52rem;font-weight:700;border-radius:9px;padding:1px 4px;min-width:15px;text-align:center}
-
-/* ── TOAST / NOTIF ────────────────────────────────────────── */
+/* TOAST */
 #toast{position:fixed;bottom:calc(70px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(8px);background:rgba(0,212,255,0.12);border:1.5px solid var(--cyan);color:var(--cyan);padding:.55rem 1.2rem;border-radius:10px;font-size:.8rem;font-weight:600;display:none;z-index:9998;white-space:normal;word-break:break-word;text-align:center;max-width:calc(100vw - 2rem);width:max-content;transition:opacity .3s,transform .3s;pointer-events:none}
+/* NOTIF */
 #notif-wrap{position:fixed;top:62px;right:.8rem;z-index:500;display:flex;flex-direction:column;gap:.4rem;max-width:290px;pointer-events:none}
 .notif-banner{background:#0e0018;border:1px solid rgba(0,212,255,0.2);border-radius:12px;padding:.65rem .85rem;display:flex;align-items:flex-start;gap:.55rem;box-shadow:0 4px 20px rgba(0,0,0,.6);animation:nSlide .3s ease;pointer-events:all}
 @keyframes nSlide{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-.notif-icon{font-size:1.1rem;flex-shrink:0}
-.notif-title{font-weight:700;font-size:.78rem}
-.notif-msg{font-size:.7rem;color:var(--dim);margin-top:2px}
-.notif-close{margin-left:auto;background:none;border:none;color:var(--dim);cursor:pointer;font-size:.85rem;flex-shrink:0;padding:0 0 0 .35rem}
-
-/* ── CARDS ────────────────────────────────────────────────── */
+.notif-icon{font-size:1.1rem;flex-shrink:0}.notif-title{font-weight:700;font-size:.78rem}.notif-msg{font-size:.7rem;color:var(--dim);margin-top:2px}
+.notif-close{margin-left:auto;background:none;border:none;color:var(--dim);cursor:pointer;font-size:.85rem;flex-shrink:0}
+/* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .card.empty{padding:1.5rem;text-align:center;color:var(--dim);font-size:.82rem}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
 .btn-xs{padding:.3rem .65rem;border-radius:6px;font-size:.64rem;font-weight:700;background:transparent;border:1px solid var(--border);color:var(--dim);cursor:pointer;font-family:'Exo 2',sans-serif}
-.btn-xs:hover{color:var(--cyan);border-color:var(--cyan)}
-.btn-xs.gold{border-color:rgba(255,230,0,0.3);color:var(--gold)}
-
-/* ── HOME ─────────────────────────────────────────────────── */
+.btn-xs:hover{color:var(--cyan);border-color:var(--cyan)}.btn-xs.gold{border-color:rgba(255,230,0,0.3);color:var(--gold)}
+/* HOME */
 .home-hero{background:linear-gradient(135deg,rgba(0,212,255,0.08),rgba(0,255,133,0.05));border:1px solid rgba(0,212,255,0.15);border-radius:16px;padding:1.2rem;display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
 .home-hero-img{width:54px;height:54px;border-radius:50%;border:2px solid rgba(0,212,255,0.3)}
 .home-hero-title{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900}
@@ -159,17 +133,13 @@ select.inp option{background:#0e0018;color:var(--text)}
 .stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .4rem;text-align:center}
 .stat-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:var(--cyan)}
 .stat-lbl{font-size:.56rem;color:var(--dim);margin-top:2px}
-
-/* ── NEWS TICKER ──────────────────────────────────────────── */
+/* NEWS TICKER */
 @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .news-ticker-item{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--text);white-space:nowrap;cursor:pointer;padding:0 .5rem}
 .news-ticker-item:hover{color:var(--cyan)}
 .news-ticker-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);flex-shrink:0}
-
-/* ── LEAGUES ──────────────────────────────────────────────── */
-.lg-tabs{display:flex;gap:.4rem;margin-bottom:.8rem;overflow-x:auto;padding-bottom:2px}
-.lgtab{padding:.45rem .9rem;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--dim);font-family:'Exo 2',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
-.lgtab.active{background:rgba(0,212,255,0.1)}
+/* STANDINGS */
+.lg-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:5px}
 .table-wrap{overflow-x:auto}
 .standings-table{width:100%;border-collapse:collapse;font-size:.72rem}
 .standings-table th{padding:.45rem .3rem;text-align:center;font-family:'Orbitron',sans-serif;font-size:.52rem;color:var(--dim);letter-spacing:1px;border-bottom:1px solid var(--border)}
@@ -179,54 +149,30 @@ select.inp option{background:#0e0018;color:var(--text)}
 .fd.w{background:#00ff88}.fd.d{background:#ffe600}.fd.l{background:#FF2882}
 .deduct-badge{font-size:.55rem;color:var(--pink);background:rgba(255,40,130,0.12);border:1px solid rgba(255,40,130,0.25);border-radius:5px;padding:1px 4px;margin-left:3px}
 .legend{display:flex;gap:1rem;font-size:.65rem;color:var(--dim);margin-top:.7rem;flex-wrap:wrap}
-.lg-badge{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:5px}
-
-/* ── FIXTURES ─────────────────────────────────────────────── */
+/* FIXTURES */
 .filter-tabs{display:flex;gap:.4rem;margin-bottom:.8rem;overflow-x:auto;padding-bottom:2px}
 .ftab{padding:.4rem .8rem;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--dim);font-size:.74rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
 .ftab.active{background:rgba(0,212,255,0.1);border-color:var(--cyan);color:var(--cyan)}
-.fx-date-label{font-family:'Orbitron',sans-serif;font-size:.6rem;color:var(--dim);letter-spacing:2px;padding:.38rem 0;margin:.7rem 0 .35rem}
 .fx-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.75rem .8rem;margin-bottom:.45rem}
 .fx-card.fx-mine{border-color:rgba(255,230,0,0.28)}
-.fx-card.fx-post{opacity:.75}
-.fx-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;gap:.28rem}
 .fx-teams{display:flex;align-items:center;justify-content:space-between;gap:.38rem}
-.fx-team{flex:1;text-align:center;cursor:pointer}
-.fx-name{font-size:.73rem;font-weight:700;margin-top:2px}
+.fx-team{flex:1;text-align:center;cursor:pointer}.fx-name{font-size:.73rem;font-weight:700;margin-top:2px}
 .fx-score{background:rgba(0,0,0,0.4);border-radius:7px;padding:5px 9px;text-align:center;min-width:50px}
-.fx-actions{display:flex;gap:.3rem;margin-top:.5rem;padding-top:.5rem;border-top:1px solid rgba(255,255,255,0.04);flex-wrap:wrap}
 .fx-badge{font-size:.54rem;font-weight:700;border-radius:8px;padding:1px 5px;border:1px solid}
 .fx-badge.mine{color:var(--gold);background:rgba(255,230,0,0.08);border-color:rgba(255,230,0,0.2)}
 .fx-badge.warn{color:#ff6b00;background:rgba(255,107,0,0.08);border-color:rgba(255,107,0,0.2)}
 .fx-badge.info{color:var(--cyan);background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.2)}
 .fx-badge.danger{color:var(--pink);background:rgba(255,40,130,0.08);border-color:rgba(255,40,130,0.2)}
-.fx-badge.ref{color:#a78bfa;background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.25)}
 .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
-
-/* ── MATCH PREP ───────────────────────────────────────────── */
+/* MATCH PREP */
 .mcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.75rem .8rem;margin-bottom:.5rem}
 .mcard-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.45rem;font-size:.82rem}
 .mcard-btns{display:flex;gap:.35rem;margin-top:.5rem;flex-wrap:wrap}
 .mcard-btns .btn-sm{font-size:.68rem;padding:.35rem .65rem;white-space:nowrap}
 .mcode{font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:1.5px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);border-radius:7px;padding:3px 8px;cursor:pointer;display:inline-block}
-#prep-15min-notice{margin-bottom:.65rem}
-
-/* ── PREDICTIONS ──────────────────────────────────────────── */
-.pred-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.9rem;margin-bottom:.6rem;position:relative;overflow:hidden}
-.pred-card.big-match{border-color:rgba(255,40,40,0.5);box-shadow:0 0 20px rgba(255,40,40,0.15)}
-.pred-card.big-match::before{content:'';position:absolute;inset:0;border-radius:14px;border:2px solid rgba(255,60,60,0.4);animation:bigPulse 2s ease-in-out infinite;pointer-events:none}
-@keyframes bigPulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(255,40,40,0.2)}50%{box-shadow:inset 0 0 20px 2px rgba(255,40,40,0.15)}}
-.big-match-banner{display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem;padding:.35rem .6rem;background:rgba(255,30,30,0.12);border-radius:7px;border:1px solid rgba(255,30,30,0.25)}
-.big-match-pulse{width:8px;height:8px;border-radius:50%;background:#ff3030;flex-shrink:0;animation:dotPulse 1s ease-in-out infinite}
-@keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,48,48,.6)}50%{box-shadow:0 0 0 5px rgba(255,48,48,0)}}
-.big-match-banner span{font-size:.62rem;font-weight:700;color:#ff6060;font-family:'Orbitron',sans-serif;letter-spacing:1px}
-.pred-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;flex-wrap:wrap;gap:.3rem}
-.pred-teams{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
-.pred-team{flex:1;text-align:center}
-.pred-name{font-size:.72rem;font-weight:700;margin-top:3px}
-.pred-vs{font-size:.7rem;color:var(--dim);font-weight:600}
-
-/* ── MESSENGER ────────────────────────────────────────────── */
+.mstatus{font-size:.6rem;font-weight:700;border-radius:7px;padding:2px 8px;background:rgba(0,0,0,0.3)}
+.ms-rdy{color:var(--green)}.ms-warn{color:var(--gold)}.ms-pend{color:var(--dim)}
+/* MESSENGER */
 .msng-wrap{display:flex;flex-direction:column;height:calc(100vh - 54px - 62px - var(--safe-bottom));overflow:hidden}
 .msng-header{display:flex;align-items:center;gap:.6rem;padding:.6rem .9rem;border-bottom:1px solid var(--border);flex-shrink:0}
 .msng-back{background:none;border:none;color:var(--cyan);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;line-height:1}
@@ -241,25 +187,16 @@ select.inp option{background:#0e0018;color:var(--text)}
 .msng-conv-row:hover{background:rgba(0,212,255,0.05)}
 .msng-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;flex-shrink:0;position:relative;overflow:hidden}
 .msng-av-dot{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--green);border:2px solid var(--bg)}
-.msng-conv-info{flex:1;min-width:0}
-.msng-conv-name{font-size:.85rem;font-weight:700;margin-bottom:2px}
+.msng-conv-info{flex:1;min-width:0}.msng-conv-name{font-size:.85rem;font-weight:700;margin-bottom:2px}
 .msng-conv-last{font-size:.72rem;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msng-conv-last.unread{color:var(--text);font-weight:600}
 .msng-conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.msng-conv-time{font-size:.62rem;color:var(--dim)}
-.msng-unread-dot{width:10px;height:10px;border-radius:50%;background:var(--cyan)}
-.msng-room-row{display:flex;align-items:center;gap:.6rem;padding:.8rem 1rem;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s}
-.msng-room-row:hover{background:rgba(0,212,255,0.05)}
-.msng-room-info{flex:1;min-width:0}
-.msng-room-name{font-size:.8rem;font-weight:700;margin-bottom:3px}
-.msng-room-meta{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.msng-conv-time{font-size:.62rem;color:var(--dim)}.msng-unread-dot{width:10px;height:10px;border-radius:50%;background:var(--cyan)}
 .msng-thread-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
 .msng-thread-header{display:flex;align-items:center;gap:.5rem;padding:.55rem .8rem;border-bottom:1px solid var(--border);flex-shrink:0;background:rgba(10,0,16,0.8)}
 .msng-back-sm{background:none;border:none;color:var(--cyan);font-size:1.2rem;cursor:pointer;padding:.1rem .3rem;flex-shrink:0;line-height:1}
 .msng-thread-name{flex:1;font-weight:700;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msng-view-btn{background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:7px;color:var(--cyan);font-size:.9rem;cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.msng-online-pill{display:flex;align-items:center;gap:.3rem;font-size:.65rem;color:var(--dim)}
-.online-dot-sm{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green)}
 .msng-msgs{flex:1;overflow-y:auto;padding:.6rem .8rem;display:flex;flex-direction:column;gap:3px;-webkit-overflow-scrolling:touch}
 .msng-msg{display:flex;flex-direction:column;margin-bottom:2px}
 .msng-msg.mine{align-items:flex-end}.msng-msg.other{align-items:flex-start}
@@ -268,41 +205,49 @@ select.inp option{background:#0e0018;color:var(--text)}
 .msng-msg.mine .msng-bubble{background:linear-gradient(135deg,rgba(0,212,255,0.28),rgba(0,150,200,0.22));border-bottom-right-radius:4px}
 .msng-time{font-size:.58rem;color:var(--dim);margin-top:2px;padding:0 3px}
 .msng-sys{text-align:center;font-size:.64rem;color:var(--dim);padding:.35rem;margin:.3rem 0;font-style:italic}
-.msng-sender{display:flex;align-items:center;gap:.35rem;margin:4px 0 2px;font-size:.64rem;color:var(--dim)}
-.msng-av-sm{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.52rem;font-weight:700;flex-shrink:0}
 .msng-empty{color:var(--dim);font-size:.8rem;text-align:center;padding:2.5rem 1rem;line-height:1.6}
 .msng-loading{color:var(--dim);font-size:.76rem;text-align:center;padding:1.5rem}
 .msng-inp-row{display:flex;align-items:center;gap:.4rem;padding:.55rem .8rem;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;padding-bottom:calc(.55rem + var(--safe-bottom))}
-#msng-inp{flex:1;padding:.55rem .85rem;background:rgba(255,255,255,0.07);border:1.5px solid var(--border);border-radius:22px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.86rem;outline:none;-webkit-appearance:none}
+#msng-inp{flex:1;padding:.55rem .85rem;background:rgba(255,255,255,0.07);border:1.5px solid var(--border);border-radius:22px;color:var(--text);font-family:'Exo 2',sans-serif;font-size:.86rem;outline:none}
 #msng-inp:focus{border-color:var(--cyan);background:rgba(0,212,255,0.06)}
 .msng-send{background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:50%;width:38px;height:38px;color:#000;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-
-/* ── MODALS ───────────────────────────────────────────────── */
+.dm-result-row{display:flex;align-items:center;gap:.6rem;padding:.65rem .5rem;cursor:pointer;border-radius:8px;transition:.15s}
+.dm-result-row:hover{background:rgba(0,212,255,0.06)}
+/* MODALS */
 .modal{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.75);display:none;align-items:flex-end;justify-content:center;padding:0}
 .modal.active{display:flex}
 .modal-box{background:#0e0018;border:1px solid var(--border);border-radius:20px 20px 0 0;padding:1.2rem 1.1rem calc(1.2rem + var(--safe-bottom));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;position:relative;animation:slideUp .25s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-box.wide{max-width:480px}
 .modal-close{position:absolute;top:.8rem;right:.8rem;background:rgba(255,255,255,0.06);border:none;border-radius:50%;width:28px;height:28px;color:var(--dim);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .modal-title{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;margin-bottom:.8rem;color:var(--cyan)}
 .modal-btns{display:flex;gap:.5rem;margin-top:.8rem}
 .form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:.6rem}
-.form-row{display:flex;gap:.5rem;flex-wrap:wrap}
-.form-row .form-group{flex:1;min-width:120px}
+.form-row{display:flex;gap:.5rem;flex-wrap:wrap}.form-row .form-group{flex:1;min-width:120px}
 .btn-secondary{flex:1;padding:.65rem;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-size:.82rem;cursor:pointer;transition:.2s;font-family:'Exo 2',sans-serif}
 .btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
 .btn-danger{flex:1;padding:.65rem;border-radius:10px;border:1px solid rgba(255,40,130,0.3);background:rgba(255,40,130,0.12);color:var(--pink);font-size:.82rem;cursor:pointer;font-family:'Exo 2',sans-serif;transition:.2s}
 .full-width{width:100%}
-
-/* ── PROFILE ──────────────────────────────────────────────── */
-.prof-cover{height:110px;background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,255,133,0.06));position:relative;background-size:cover;background-position:center;border-radius:12px 12px 0 0}
+/* SCORE */
+.score-box{display:flex;align-items:center;justify-content:center;gap:1rem;margin:1rem 0}
+.score-team{text-align:center}.score-team-name{font-size:.76rem;font-weight:700;margin-bottom:.4rem}
+.score-stepper{display:flex;align-items:center;gap:.5rem}
+.score-num{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--green);min-width:32px;text-align:center}
+.score-vs{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--dim)}
+.step-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.step-btn:hover{border-color:var(--cyan);color:var(--cyan)}.step-btn.add{border-color:var(--green);color:var(--green)}
+.honesty-check{display:flex;align-items:flex-start;gap:.5rem;font-size:.74rem;color:var(--dim);cursor:pointer;line-height:1.4;margin:.5rem 0}
+.honesty-check input{margin-top:2px;flex-shrink:0}
+.upload-label{display:flex;align-items:center;gap:.5rem;padding:.65rem .85rem;border-radius:10px;border:1.5px dashed var(--border);cursor:pointer;font-size:.8rem;color:var(--dim);transition:.2s}
+.upload-label:hover{border-color:var(--cyan);color:var(--cyan)}
+.ss-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-top:.5rem;border:1px solid var(--border)}
+/* PROFILE */
+.prof-cover{height:110px;position:relative;background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(0,255,133,0.06));background-size:cover;background-position:center;border-radius:12px 12px 0 0}
 .prof-avatar-wrap{position:absolute;bottom:-28px;left:1rem}
 .prof-avatar{width:56px;height:56px;border-radius:50%;border:3px solid var(--bg);background:rgba(0,212,255,0.12);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
 .prof-info{padding:2rem 1rem .9rem;border-bottom:1px solid var(--border)}
 .prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;padding:.9rem}
 .prof-stat-box{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:.6rem .4rem;text-align:center}
-
-/* ── UCL ──────────────────────────────────────────────────── */
+/* UCL */
 .ucl-prizes{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
 .ucl-prize{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.8rem .5rem;text-align:center}
 .ucl-prize.gold{border-color:rgba(255,230,0,0.3);background:rgba(255,230,0,0.05)}
@@ -312,66 +257,39 @@ select.inp option{background:#0e0018;color:var(--text)}
 .ucl-prize-val{font-family:Orbitron,sans-serif;font-weight:900;font-size:.88rem;color:var(--gold)}
 .ucl-fee-box{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:12px;padding:.9rem;margin-bottom:.8rem}
 .ucl-rules{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:.75rem;margin-bottom:.8rem}
-
-/* ── ADMIN ────────────────────────────────────────────────── */
+/* ADMIN */
 .admin-tabs{display:flex;gap:.3rem;overflow-x:auto;margin-bottom:.7rem;padding-bottom:2px}
 .atab{padding:.4rem .75rem;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--dim);font-family:'Exo 2',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.2s}
 .atab.active{background:rgba(0,212,255,0.1);border-color:var(--cyan);color:var(--cyan)}
 .apanel{display:none}.apanel.active{display:block}
 .admin-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem .8rem;margin-bottom:.5rem;font-size:.8rem}
-.admin-card.done{opacity:.6}.admin-card.banned{border-color:rgba(255,40,130,0.3);background:rgba(255,40,130,0.04)}
-
-/* ── SWAP ─────────────────────────────────────────────────── */
+.admin-card.done{opacity:.6}
+/* SWAP */
 .swap-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .5rem;cursor:pointer;border-radius:8px;border:1.5px solid transparent;transition:.2s;margin-bottom:.3rem}
 .swap-row:hover{background:rgba(0,212,255,0.06);border-color:rgba(0,212,255,0.2)}
-
-/* ── SCORE SUBMIT ─────────────────────────────────────────── */
-.score-panel{margin-bottom:.6rem}
-.score-box{display:flex;align-items:center;justify-content:center;gap:1rem;margin:1rem 0}
-.score-team{text-align:center}.score-team-name{font-size:.76rem;font-weight:700;margin-bottom:.4rem}
-.score-stepper{display:flex;align-items:center;gap:.5rem}
-.score-num{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:900;color:var(--green);min-width:32px;text-align:center}
-.score-vs{font-family:'Orbitron',sans-serif;font-size:1rem;color:var(--dim)}
-.step-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
-.step-btn:hover{border-color:var(--cyan);color:var(--cyan)}
-.step-btn.add{border-color:var(--green);color:var(--green)}
-.honesty-check{display:flex;align-items:flex-start;gap:.5rem;font-size:.74rem;color:var(--dim);cursor:pointer;line-height:1.4;margin:.5rem 0}
-.honesty-check input{margin-top:2px;flex-shrink:0}
-.upload-label{display:flex;align-items:center;gap:.5rem;padding:.65rem .85rem;border-radius:10px;border:1.5px dashed var(--border);cursor:pointer;font-size:.8rem;color:var(--dim);transition:.2s}
-.upload-label:hover{border-color:var(--cyan);color:var(--cyan)}
-.ss-preview{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-top:.5rem;border:1px solid var(--border)}
-.report-who{font-weight:700;color:var(--cyan);font-size:.88rem;padding:.4rem 0}
-.dm-result-row{display:flex;align-items:center;gap:.6rem;padding:.65rem .5rem;cursor:pointer;border-radius:8px;transition:.15s}
-.dm-result-row:hover{background:rgba(0,212,255,0.06)}
-
-/* ── LEAGUE PICKER ────────────────────────────────────────── */
-.league-pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.4rem}
-.league-pick-opt{display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s}
-.league-pick-opt:hover,.league-pick-opt.selected{border-color:var(--cyan);background:rgba(0,212,255,0.08)}
-.league-pick-opt img{width:28px;height:28px;object-fit:contain}
-
-/* ── RESULT CELEBRATION ───────────────────────────────────── */
+/* CELEBRATION */
 #result-celebration{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center}
 #result-celebration.hidden{display:none}
 .celeb-inner{background:var(--card);border:1px solid rgba(0,212,255,0.2);border-radius:20px;padding:2rem;text-align:center;max-width:300px;width:90%}
 .celeb-score{font-family:'Orbitron',sans-serif;font-size:2.5rem;font-weight:900;color:var(--green);margin-bottom:.4rem}
-.celeb-teams{font-size:.8rem;color:var(--dim);margin-bottom:.6rem}
 .celeb-winner{font-size:1rem;font-weight:700;color:var(--gold)}
-
-/* ── POLLS ────────────────────────────────────────────────── */
-.poll-vote-bar{min-height:20px}
-
-/* ── NEWS ─────────────────────────────────────────────────── */
+/* LEAGUE PICKER */
+.league-pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.4rem}
+.league-pick-opt{display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s}
+.league-pick-opt:hover,.league-pick-opt.selected{border-color:var(--cyan);background:rgba(0,212,255,0.08)}
+.league-pick-opt img{width:28px;height:28px;object-fit:contain}
+/* NEWS */
 .bs{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text);border-radius:8px;cursor:pointer;font-family:'Exo 2',sans-serif;font-weight:600;font-size:.78rem;padding:7px 14px;transition:.15s}
 .bs:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.3);color:var(--cyan)}
-.news-card{transition:background .2s,border-color .2s}
-.news-card:hover{background:rgba(0,212,255,0.04)!important;border-color:rgba(0,212,255,0.25)!important}
+.news-card{transition:background .2s,border-color .2s}.news-card:hover{background:rgba(0,212,255,0.04)!important;border-color:rgba(0,212,255,0.25)!important}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scalein{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-
-/* ── NOTIFICATIONS ────────────────────────────────────────── */
-#page-notifications{padding:.75rem .8rem}
-@keyframes attPulse{0%,100%{box-shadow:0 0 4px rgba(0,255,133,.6)}50%{box-shadow:0 0 14px rgba(0,255,133,1)}}
+/* PRED */
+.pred-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.9rem;margin-bottom:.6rem}
+/* EVENTS PAGE */
+.ev-country-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem .8rem;text-align:center;cursor:pointer;transition:.2s}
+.ev-country-card:hover,.ev-country-card:active{border-color:var(--cyan);background:rgba(0,212,255,0.06)}
+.ev-event-row{border-radius:14px;padding:1rem;margin-bottom:.6rem;cursor:pointer;transition:.2s}
+.ev-event-row:hover{filter:brightness(1.1)}
 </style>
 </head>
 <body>
@@ -394,7 +312,6 @@ select.inp option{background:#0e0018;color:var(--text)}
       <button class="ltab active" onclick="lTab('in')">Sign In</button>
       <button class="ltab" onclick="lTab('up')">Join</button>
     </div>
-    <!-- SIGN IN -->
     <div id="l-in" class="lpanel active">
       <div><label class="lbl">Email</label><input class="inp" id="li-em" type="email" placeholder="your@email.com" autocomplete="email"></div>
       <div><label class="lbl">Password</label><input class="inp" id="li-pw" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doSignIn()"></div>
@@ -403,7 +320,6 @@ select.inp option{background:#0e0018;color:var(--text)}
       <div class="or-line"><span>or</span></div>
       <button class="btn-google" onclick="doGoogleSignIn()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18" alt="G"> Continue with Google</button>
     </div>
-    <!-- REGISTER -->
     <div id="l-up" class="lpanel">
       <div id="reg-step1">
         <div><label class="lbl">Username</label><input class="inp" id="ru-name" placeholder="YourGamertag" maxlength="20" autocomplete="username"></div>
@@ -423,7 +339,7 @@ select.inp option{background:#0e0018;color:var(--text)}
         <button class="btn-secondary" style="margin-top:.5rem" onclick="regBack()">Back</button>
       </div>
       <div id="reg-step3" class="hidden">
-        <div id="club-confirm-box"></div>
+        <div id="club-confirm-box" style="text-align:center;padding:1rem;background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.15);border-radius:12px"></div>
         <div class="errmsg" id="ru-err3"></div>
         <div style="display:flex;gap:.5rem;margin-top:.5rem">
           <button class="btn-secondary" onclick="regBackToGrid()">Change</button>
@@ -435,12 +351,11 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- TOAST -->
+<!-- TOAST + NOTIF BANNERS -->
 <div id="toast"></div>
-<!-- NOTIFICATION BANNERS -->
 <div id="notif-wrap"></div>
 
-<!-- FLOATING CHAT FAB -->
+<!-- CHAT FAB -->
 <div id="chat-fab" onclick="openMessenger('dms')">
   <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   <div id="fab-badge"></div>
@@ -460,10 +375,10 @@ select.inp option{background:#0e0018;color:var(--text)}
   <button class="drawer-btn" onclick="closeDrawer();goPage('predict')"><span class="drawer-icon">🎯</span> Predictions</button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('polls')"><span class="drawer-icon">📊</span> Polls<span id="polls-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();openMessenger('dms')"><span class="drawer-icon">💬</span> Messages<span id="pm-badge" class="drawer-badge hidden"></span></button>
-  <button class="drawer-btn" id="drawer-notif-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="drawer-notif-badge" class="drawer-badge hidden"></span></button>
+  <button class="drawer-btn" onclick="closeDrawer();goPage('notifications')"><span class="drawer-icon">🔔</span> Notifications<span id="drawer-notif-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" id="drawer-ref-btn" style="display:none" onclick="closeDrawer();goPage('referee')"><span class="drawer-icon">🟢</span> Referee Panel<span id="ref-badge" class="drawer-badge hidden"></span></button>
   <button class="drawer-btn" onclick="closeDrawer();goPage('ucl')"><span class="drawer-icon">🏆</span> UCL</button>
-  <button class="drawer-btn" onclick="closeDrawer();goPage('friendly')" id="drawer-friendly-btn" style="display:none"><span class="drawer-icon">⚔️</span> Friendly Match<span id="friendly-badge" class="drawer-badge hidden"></span></button>
+  <button class="drawer-btn" id="drawer-friendly-btn" style="display:none" onclick="closeDrawer();goPage('friendly')"><span class="drawer-icon">⚔️</span> Friendly<span id="friendly-badge" class="drawer-badge hidden"></span></button>
   <div class="drawer-divider"></div>
   <button class="drawer-btn danger" id="drawer-admin-btn" onclick="closeDrawer();goPage('admin')" style="display:none"><span class="drawer-icon">🛡</span> Admin Panel</button>
   <button class="drawer-btn danger" id="drawer-signout-btn" onclick="closeDrawer();doLogout()" style="display:none"><span class="drawer-icon">🚪</span> Sign Out</button>
@@ -475,7 +390,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <button id="hamburger" onclick="openDrawer()"><span></span><span></span><span></span></button>
   <div class="topbar-logo" onclick="goPage('home')">
     <img src="https://i.ibb.co/MDGqDxPS/grok-1773616908832-2.jpg" alt="logo" class="topbar-logo-img" onerror="this.style.display='none'">
-    <span class="topbar-logo-text">eFOOTBALL</span>
+    <span class="topbar-logo-text">eFOOTBALL UNIVERSE</span>
   </div>
   <div id="nav-right">
     <button class="btn-sm btn-outline" onclick="lTab('in');showLanding()">Login</button>
@@ -492,7 +407,7 @@ select.inp option{background:#0e0018;color:var(--text)}
       <img src="https://i.ibb.co/MDGqDxPS/grok-1773616908832-2.jpg" class="home-hero-img" alt="logo" onerror="this.style.display='none'">
       <div style="flex:1">
         <div class="home-hero-title"><span class="c-cyan">eFootball</span> <span class="c-green">Universe</span></div>
-        <div class="home-hero-sub">Season 2024/25 — <span class="c-green">Live</span></div>
+        <div class="home-hero-sub">Season Live — <span class="c-green">All Leagues Active</span></div>
       </div>
       <div id="home-cta"><button class="btn-sm btn-accent" onclick="lTab('up');showLanding()">Join</button></div>
     </div>
@@ -511,23 +426,14 @@ select.inp option{background:#0e0018;color:var(--text)}
     </div>
     <!-- FEATURED NEWS -->
     <div id="news-featured" style="margin-bottom:.8rem"></div>
-    <!-- RECENT RESULTS -->
     <div class="section-header"><div class="section-title c-green">Recent Results</div><div class="section-line green"></div></div>
     <div class="grid2" id="recent-res"><div class="card empty">No results yet.</div></div>
-    <!-- TOP PLAYERS -->
     <div class="section-header" style="margin-top:1.2rem"><div class="section-title c-gold">Top Players</div><div class="section-line gold"></div></div>
     <div class="grid2" id="top-players"><div class="card empty">No players yet.</div></div>
   </div>
 
-  <!-- NEWS -->
-  <div class="page" id="page-news">
-    <div id="news-anchor-section"></div>
-  </div>
-
-  <!-- EVENTS (Leagues + Cups) -->
-  <div class="page" id="page-leagues">
-    <!-- Rendered dynamically by renderEventsPage() in pages.js -->
-  </div>
+  <!-- EVENTS (Leagues + Cups by Country) -->
+  <div class="page" id="page-leagues"><!-- renderEventsPage() fills this --></div>
 
   <!-- FIXTURES -->
   <div class="page" id="page-fixtures">
@@ -543,8 +449,10 @@ select.inp option{background:#0e0018;color:var(--text)}
         <button class="btn-primary" style="align-self:flex-end;width:auto;padding:.65rem 1rem" onclick="addFixture()">Add</button>
       </div>
     </div>
-    <div id="score-panel" class="score-panel hidden"><button class="btn-primary" onclick="openScoreModal()">Submit Match Result</button></div>
-    <div class="filter-tabs" id="fix-filters">
+    <div id="score-panel" class="hidden" style="margin-bottom:.6rem">
+      <button class="btn-primary" onclick="openScoreModal()">Submit Match Result</button>
+    </div>
+    <div class="filter-tabs">
       <button class="ftab active" onclick="filterFx('all',this)">All</button>
       <button class="ftab" onclick="filterFx('epl',this)">EPL</button>
       <button class="ftab" onclick="filterFx('laliga',this)">La Liga</button>
@@ -561,16 +469,11 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div id="my-swap-section"></div>
     <div class="page-header">
       <div class="section-title c-gold">Match Prep</div>
-      <div style="display:flex;gap:.4rem">
-        <button class="btn-sm btn-outline" onclick="goPage('friendly')" id="challenge-btn" style="display:none">⚔️ Friendly</button>
-      </div>
+      <button class="btn-sm btn-outline" id="challenge-btn" style="display:none" onclick="goPage('friendly')">⚔️ Friendly</button>
     </div>
     <div class="section-header"><div class="section-title c-cyan" style="font-size:.68rem">MATCH ROOMS</div><div class="section-line"></div></div>
-    <div id="match-rooms-wrap">
-      <div id="match-rooms-list"><div class="card empty">Loading...</div></div>
-      <div id="match-room-panel" class="hidden"></div>
-    </div>
-    <div class="section-header"><div class="section-title c-green" style="font-size:.65rem">UPCOMING SCHEDULED</div></div>
+    <div id="match-rooms-list"><div class="card empty">Loading...</div></div>
+    <div class="section-header"><div class="section-title c-green" style="font-size:.65rem">SCHEDULED</div></div>
     <div id="sched-timeline"><div class="card empty">No scheduled matches yet.</div></div>
     <div class="section-header" style="margin-top:1rem"><div class="section-title c-gold" style="font-size:.65rem">YOUR HOME MATCHES</div></div>
     <div id="prep-home-list"></div>
@@ -578,14 +481,17 @@ select.inp option{background:#0e0018;color:var(--text)}
     <div id="prep-away-list"></div>
   </div>
 
+  <!-- NEWS -->
+  <div class="page" id="page-news"><div id="news-anchor-section"></div></div>
+
   <!-- PREDICTIONS -->
   <div class="page" id="page-predict"></div>
 
-  <!-- FRIENDLY -->
-  <div class="page" id="page-friendly"></div>
-
   <!-- UCL -->
   <div class="page" id="page-ucl"></div>
+
+  <!-- FRIENDLY -->
+  <div class="page" id="page-friendly"></div>
 
   <!-- REFEREE -->
   <div class="page" id="page-referee"></div>
@@ -599,11 +505,8 @@ select.inp option{background:#0e0018;color:var(--text)}
   <!-- POLLS -->
   <div class="page" id="page-polls"></div>
 
-  <!-- CHAT / MESSENGER -->
+  <!-- CHAT -->
   <div class="page" id="page-chat"></div>
-
-  <!-- DMs (legacy redirect to chat) -->
-  <div class="page" id="page-pm"></div>
 
   <!-- PROFILE -->
   <div class="page" id="page-profile"><div id="profile-content"></div></div>
@@ -614,7 +517,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <!-- ADMIN -->
   <div class="page" id="page-admin"></div>
 
-</div><!-- end #app -->
+</div><!-- #app -->
 
 <!-- BOTTOM NAV -->
 <nav id="botnav">
@@ -645,11 +548,9 @@ select.inp option{background:#0e0018;color:var(--text)}
 
 <!-- RESULT CELEBRATION -->
 <div id="result-celebration" class="hidden"></div>
-
-<!-- SEASON BANNER -->
 <div id="season-banner" style="display:none"></div>
 
-<!-- ══ MODALS ══════════════════════════════════════════════ -->
+<!-- ══ MODALS ══════════════════════════════════════════════════ -->
 
 <!-- SCORE SUBMIT -->
 <div class="modal" id="score-mo" onclick="if(event.target===this)closeMo('score-mo')">
@@ -678,7 +579,7 @@ select.inp option{background:#0e0018;color:var(--text)}
     <button class="modal-close" onclick="closeMo('dispute-mo')">✕</button>
     <h3 class="modal-title">Dispute Result</h3>
     <input type="hidden" id="disp-mid">
-    <div style="text-align:center;margin:.7rem 0"><div style="font-size:.7rem;color:var(--dim)">Submitted score:</div><div id="disp-score" style="font-family:Orbitron,sans-serif;font-size:1.3rem;font-weight:900;color:var(--pink)">0 – 0</div></div>
+    <div style="text-align:center;margin:.7rem 0"><div style="font-size:.7rem;color:var(--dim)">Submitted score</div><div id="disp-score" style="font-family:Orbitron,sans-serif;font-size:1.3rem;font-weight:900;color:var(--pink)">0 – 0</div></div>
     <p style="font-size:.76rem;color:var(--dim);margin-bottom:.7rem">Upload your screenshot showing the real result.</p>
     <label class="upload-label"><span id="disp-ss-label">Upload your screenshot</span><input type="file" id="disp-screenshot" accept="image/*" style="display:none" onchange="dispPreviewScreenshot(this)"></label>
     <img id="disp-ss-preview" class="ss-preview hidden" alt="">
@@ -687,7 +588,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- MATCH PREP MODAL -->
+<!-- MATCH PREP CODE -->
 <div class="modal" id="prep-mo" onclick="if(event.target===this)closeMo('prep-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('prep-mo')">✕</button>
@@ -701,13 +602,28 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
+<!-- SET TIME -->
+<div class="modal" id="set-time-mo" onclick="if(event.target===this)closeMo('set-time-mo')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeMo('set-time-mo')">✕</button>
+    <h3 class="modal-title">Set Match Time</h3>
+    <input type="hidden" id="set-time-mid">
+    <div class="form-group"><label class="lbl">Date & Time</label><input class="inp" id="set-time-inp" type="datetime-local"></div>
+    <div class="errmsg" id="set-time-err"></div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeMo('set-time-mo')">Cancel</button>
+      <button class="btn-primary" onclick="saveMatchTime()">Save Time</button>
+    </div>
+  </div>
+</div>
+
 <!-- REPORT -->
 <div class="modal" id="report-mo" onclick="if(event.target===this)closeMo('report-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('report-mo')">✕</button>
     <h3 class="modal-title">Report User</h3>
     <input type="hidden" id="rep-uid"><input type="hidden" id="rep-uname"><input type="hidden" id="rep-mid">
-    <div class="form-group"><label class="lbl">Reporting</label><div id="rep-who" class="report-who"></div></div>
+    <div class="form-group"><label class="lbl">Reporting</label><div id="rep-who" style="font-weight:700;color:var(--cyan);padding:.3rem 0"></div></div>
     <div class="form-group"><label class="lbl">Reason</label><select class="inp" id="rep-reason"><option value="">— Select —</option><option>Match result fraud</option><option>Abusive language</option><option>No-show for match</option><option>Unsportsmanlike conduct</option><option>Spam</option><option>Other</option></select></div>
     <div class="form-group"><label class="lbl">Details</label><textarea class="inp" id="rep-details" rows="3" placeholder="Describe what happened..."></textarea></div>
     <div class="errmsg" id="rep-err"></div>
@@ -727,7 +643,7 @@ select.inp option{background:#0e0018;color:var(--text)}
 
 <!-- USER PROFILE MODAL -->
 <div class="modal" id="user-mo" onclick="if(event.target===this)closeMo('user-mo')">
-  <div class="modal-box wide">
+  <div class="modal-box" style="max-width:480px">
     <button class="modal-close" onclick="closeMo('user-mo')">✕</button>
     <div id="user-mo-content"></div>
   </div>
@@ -747,10 +663,10 @@ select.inp option{background:#0e0018;color:var(--text)}
       <div class="form-group"><label class="lbl">Choose League</label>
         <input type="hidden" id="gs-league-val" value="">
         <div class="league-pick-grid">
-          <div class="league-pick-opt" data-lid="epl" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" loading="lazy"><div><div>Premier League</div></div></div>
-          <div class="league-pick-opt" data-lid="laliga" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/commons/1/13/LaLiga_logo_2023.svg" loading="lazy"><div><div>La Liga</div></div></div>
-          <div class="league-pick-opt" data-lid="seriea" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/en/e/e1/Serie_A_logo_%282019%29.svg" loading="lazy"><div><div>Serie A</div></div></div>
-          <div class="league-pick-opt" data-lid="ligue1" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Ligue1_logo_2024.svg" loading="lazy"><div><div>Ligue 1</div></div></div>
+          <div class="league-pick-opt" data-lid="epl" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" loading="lazy"><div>Premier League</div></div>
+          <div class="league-pick-opt" data-lid="laliga" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/commons/1/13/LaLiga_logo_2023.svg" loading="lazy"><div>La Liga</div></div>
+          <div class="league-pick-opt" data-lid="seriea" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/en/e/e1/Serie_A_logo_%282019%29.svg" loading="lazy"><div>Serie A</div></div>
+          <div class="league-pick-opt" data-lid="ligue1" onclick="gsSelectLeague(this)"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Ligue1_logo_2024.svg" loading="lazy"><div>Ligue 1</div></div>
         </div>
       </div>
       <div class="errmsg" id="gs-err2"></div>
@@ -764,7 +680,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- AVATAR / BIO EDIT -->
+<!-- AVATAR -->
 <div class="modal" id="avatar-mo" onclick="if(event.target===this)closeMo('avatar-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('avatar-mo')">✕</button>
@@ -787,6 +703,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
+<!-- EDIT BIO -->
 <div class="modal" id="edit-bio-mo" onclick="if(event.target===this)closeMo('edit-bio-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('edit-bio-mo')">✕</button>
@@ -798,7 +715,22 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- PREDICT MODAL -->
+<!-- SWAP -->
+<div class="modal" id="swap-mo" onclick="if(event.target===this)closeMo('swap-mo')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeMo('swap-mo')">✕</button>
+    <h3 class="modal-title">Club Swap Request</h3>
+    <div id="swap-my-club"></div>
+    <div style="font-size:.72rem;color:var(--dim);margin-bottom:.5rem">Select a player to swap clubs with:</div>
+    <div id="swap-player-list" style="max-height:220px;overflow-y:auto"></div>
+    <div id="swap-target-info" class="hidden"></div>
+    <div class="errmsg" id="swap-err"></div>
+    <button class="btn-primary full-width hidden" id="swap-send-btn" onclick="sendSwapRequest()">Send Swap Request</button>
+    <div id="swap-msg" class="hidden" style="font-size:.78rem;color:var(--green);text-align:center;padding:.6rem;font-weight:700"></div>
+  </div>
+</div>
+
+<!-- PREDICT -->
 <div class="modal" id="predict-mo" onclick="if(event.target===this)closeMo('predict-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('predict-mo')">✕</button>
@@ -824,7 +756,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('create-poll-mo')">✕</button>
     <h3 class="modal-title">Create Poll</h3>
-    <div id="admin-poll-indicator" style="display:none;font-size:.68rem;color:var(--gold);margin-bottom:.5rem;background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.2);border-radius:8px;padding:.4rem .7rem">Admin Poll — visible to all leagues</div>
+    <div id="admin-poll-indicator" style="display:none;font-size:.68rem;color:var(--gold);margin-bottom:.5rem;background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.2);border-radius:8px;padding:.4rem .7rem">Admin Poll</div>
     <div class="form-group" id="poll-league-wrap"><label class="lbl">League</label><select class="inp" id="poll-league"><option value="">My League</option><option value="epl">EPL</option><option value="laliga">La Liga</option><option value="seriea">Serie A</option><option value="ligue1">Ligue 1</option><option value="all">All Leagues</option></select></div>
     <div class="form-group"><label class="lbl">Question</label><input class="inp" id="poll-question" placeholder="What's your question?" maxlength="120"></div>
     <div class="form-group"><label class="lbl">Option 1</label><input class="inp" id="poll-opt1" placeholder="Option 1" maxlength="60"></div>
@@ -839,7 +771,7 @@ select.inp option{background:#0e0018;color:var(--text)}
 <!-- UCL PAYMENT -->
 <div class="modal" id="ucl-pay-mo" onclick="if(event.target===this)closeMo('ucl-pay-mo')">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeMo('ucl-pay-mo')">&#10005;</button>
+    <button class="modal-close" onclick="closeMo('ucl-pay-mo')">✕</button>
     <h3 class="modal-title">UCL Entry Payment</h3>
     <div style="display:flex;gap:.5rem;margin-bottom:.8rem">
       <div style="flex:1;background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.2);border-radius:10px;padding:.7rem;text-align:center"><div style="font-size:.62rem;color:var(--dim)">1st Place</div><div id="modal-prize-1" style="font-weight:700;color:var(--gold)">—</div></div>
@@ -856,7 +788,7 @@ select.inp option{background:#0e0018;color:var(--text)}
 <!-- DEDUCT POINTS -->
 <div class="modal" id="deduct-mo" onclick="if(event.target===this)closeMo('deduct-mo')">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeMo('deduct-mo')">&#10005;</button>
+    <button class="modal-close" onclick="closeMo('deduct-mo')">✕</button>
     <h3 class="modal-title">Deduct Points</h3>
     <input type="hidden" id="ded-rep-key"><input type="hidden" id="ded-uid"><input type="hidden" id="ded-name">
     <div class="form-group"><label class="lbl">Player</label><div id="ded-player" style="font-weight:700;color:var(--cyan);padding:.3rem 0"></div></div>
@@ -870,10 +802,10 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- RESTRICT PLAYER -->
+<!-- RESTRICT -->
 <div class="modal" id="restrict-mo" onclick="if(event.target===this)closeMo('restrict-mo')">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeMo('restrict-mo')">&#10005;</button>
+    <button class="modal-close" onclick="closeMo('restrict-mo')">✕</button>
     <h3 class="modal-title">Restrict Player</h3>
     <div id="restrict-modal-content"></div>
   </div>
@@ -882,7 +814,7 @@ select.inp option{background:#0e0018;color:var(--text)}
 <!-- BROADCAST -->
 <div class="modal" id="broadcast-mo" onclick="if(event.target===this)closeMo('broadcast-mo')">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeMo('broadcast-mo')">&#10005;</button>
+    <button class="modal-close" onclick="closeMo('broadcast-mo')">✕</button>
     <h3 class="modal-title">Broadcast Message</h3>
     <div class="form-group"><label class="lbl">Type</label><select class="inp" id="broadcast-type"><option value="info">Info</option><option value="warning">Warning</option><option value="celebration">Celebration</option></select></div>
     <div class="form-group"><label class="lbl">Message</label><textarea class="inp" id="broadcast-msg" rows="3" maxlength="200" placeholder="Type your message..."></textarea></div>
@@ -890,20 +822,17 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- USER RESCHEDULE -->
+<!-- RESCHEDULE -->
 <div class="modal" id="user-postpone-mo" onclick="if(event.target===this)closeMo('user-postpone-mo')">
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('user-postpone-mo')">✕</button>
     <h3 class="modal-title">⏰ Reschedule Match</h3>
-    <div class="form-group">
-      <label class="lbl" id="upost-label">Reschedule (max ±24h from original)</label>
-      <input class="inp" id="upost-time" type="datetime-local">
-    </div>
+    <div class="form-group"><label class="lbl" id="upost-label">Reschedule (max ±24h from original)</label><input class="inp" id="upost-time" type="datetime-local"></div>
     <div style="font-size:.7rem;color:var(--dim);margin-bottom:.6rem">Users can only move a match up to 24 hours. Admin can set any time.</div>
     <div class="errmsg" id="upost-err"></div>
     <div class="modal-btns">
       <button class="btn-secondary" onclick="closeMo('user-postpone-mo')">Cancel</button>
-      <button class="btn-primary" onclick="submitUserPostpone()">Confirm Reschedule</button>
+      <button class="btn-primary" onclick="submitUserPostpone()">Confirm</button>
     </div>
   </div>
 </div>
@@ -913,7 +842,7 @@ select.inp option{background:#0e0018;color:var(--text)}
   <div class="modal-box">
     <button class="modal-close" onclick="closeMo('friendly-mo')">✕</button>
     <h3 class="modal-title">⚔️ Challenge a Player</h3>
-    <p style="font-size:.74rem;color:var(--dim);margin-bottom:.7rem">Challenge any player to a friendly match. No league points — just bragging rights.</p>
+    <p style="font-size:.74rem;color:var(--dim);margin-bottom:.7rem">Challenge any player to a friendly match. No league points.</p>
     <div id="friendly-player-list" style="max-height:220px;overflow-y:auto;margin-bottom:.6rem"></div>
     <div id="friendly-target-info" class="hidden" style="margin-bottom:.6rem"></div>
     <div id="friendly-send-wrap" class="hidden">
@@ -926,67 +855,47 @@ select.inp option{background:#0e0018;color:var(--text)}
   </div>
 </div>
 
-<!-- ══ SCRIPTS — load order matters ══════════════════════════ -->
-<!-- 1. Firebase SDKs -->
+<!-- ══ SCRIPTS — exact load order matters ══════════════════════ -->
+<!-- 1. Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<!-- 2. Config — MUST be first (defines FIREBASE_CONFIG, ADMIN_EMAIL, DB, LGS, ALL_CLUBS, etc.) -->
+<!-- 2. Config — MUST be first: defines FIREBASE_CONFIG, ADMIN_EMAIL, DB, LGS, ALL_CLUBS, CUPS, COUNTRY_GROUPS -->
 <script src="config.js"></script>
-
-<!-- 3. Core — state, helpers, navigation, Firebase boot -->
+<!-- 3. State — centralized App object + window aliases -->
+<script src="state.js"></script>
+<!-- 4. Core — helpers, navigation, Firebase boot -->
 <script src="core.js"></script>
-
-<!-- 4. Auth — login, register, Google sign-in, logout -->
+<!-- 5. Auth — login, register, Google, logout -->
 <script src="auth.js"></script>
-
-<!-- 5. Pages — standings, fixtures, match prep, schedule, home stats -->
+<!-- 6. Pages — home stats, Events/leagues/cups, fixtures, match prep, schedule -->
 <script src="pages.js"></script>
-
-<!-- 6. Features — badges, profile, polls, predictions, notifications, season end -->
+<!-- 7. Features — profile, badges, polls, notifications, season end, room codes -->
 <script src="features.js"></script>
-
-<!-- 7. Chat — messenger, DMs, global chat -->
+<!-- 8. Chat — messenger, DMs, league chat, FAB -->
 <script src="chat.js"></script>
-
-<!-- 8. Referee — score submit, disputes, referee panel -->
+<!-- 9. Referee — score submit, dispute, referee panel, force result -->
 <script src="referee.js"></script>
-
-<!-- 9. Match rooms — room codes, auto-close, prep flow -->
+<!-- 10. Matchroom — room cards, auto-approve, postpone, prep flow -->
 <script src="matchroom.js"></script>
-
-<!-- 10. Swap — club swap requests -->
+<!-- 11. Swap — club swap requests -->
 <script src="swap.js"></script>
-
-<!-- 11. UCL — bracket, payments, Paystack -->
+<!-- 12. UCL — bracket, payments, Paystack -->
 <script src="ucl.js"></script>
-
-<!-- 12. Admin — admin panel, auto-schedule, season controls -->
+<!-- 13. Admin — admin panel, auto-schedule, cup draw, season controls -->
 <script src="admin.js"></script>
-
-<!-- 13. Odds — predictions with odds display -->
+<!-- 14. Odds — match odds engine + predictions -->
 <script src="odds.js"></script>
-
-<!-- 14. Friendly — friendly match challenges -->
+<!-- 15. Friendly — friendly match challenges -->
 <script src="friendly.js"></script>
-
-<!-- 15. News — Fabrizio Romano news engine -->
+<!-- 16. News — Fabrizio Romano news engine -->
 <script src="news.js"></script>
-
-<!-- 16. Utils — shared utility functions (loads last, overrides are safe) -->
+<!-- 17. Utils — pure helpers (loads last, safe to override stubs) -->
 <script src="utils.js"></script>
-
-<!-- 17. Boot -->
+<!-- Boot -->
 <script>
-  // Small helpers used inline
-  function selectEmoji(el) {
-    document.querySelectorAll('.ep-emoji').forEach(function(e){ e.style.borderColor='transparent'; e.classList.remove('selected'); });
-    el.style.borderColor='var(--cyan)'; el.classList.add('selected');
-  }
-
-  // Start the app
-  window.addEventListener('DOMContentLoaded', function() { initApp(); });
+function selectEmoji(el){document.querySelectorAll('.ep-emoji').forEach(function(e){e.style.borderColor='transparent';e.classList.remove('selected');});el.style.borderColor='var(--cyan)';el.classList.add('selected');}
+window.addEventListener('DOMContentLoaded',function(){initApp();});
 </script>
 </body>
 </html>
